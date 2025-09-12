@@ -45,6 +45,21 @@ public class ChessBoard {
         return false;
     }
 
+    public Boolean[] IsAvailableWithKill(ChessPosition position, ChessGame.TeamColor color) {
+        //[avaliable, would it result in a kill]
+        Boolean[] availableAndKilled = {false, false};
+        if (position.getColumn() <= 8 && position.getColumn() > 0 && position.getRow() <= 8 && position.getRow() > 0) {
+            if (board[position.getRow() - 1][position.getColumn() - 1] == null) {
+                availableAndKilled[0] = true;
+            } else if (getPiece(position).getTeamColor() != color) {
+                availableAndKilled[0] = true;
+                availableAndKilled[1] = true;
+            }
+        }
+        return availableAndKilled;
+    }
+
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
