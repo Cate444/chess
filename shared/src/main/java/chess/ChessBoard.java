@@ -35,7 +35,14 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return board[position.getRow()-1][position.getColumn()-1];
+    }
+
+    public boolean IsAvailable(ChessPosition position, ChessGame.TeamColor color){
+        if (board[position.getRow()-1][position.getColumn()-1] == null || getPiece(position).getTeamColor() != color){
+            return true;
+        }
+        return false;
     }
 
     /**
