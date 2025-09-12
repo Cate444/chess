@@ -30,5 +30,4 @@ public class ChessMoveTests extends EqualsTestingUtility<ChessMove> {
                 new ChessMove(new ChessPosition(2, 6), new ChessPosition(1, 5), ChessPiece.PieceType.KNIGHT)
         );
     }
-
 }
