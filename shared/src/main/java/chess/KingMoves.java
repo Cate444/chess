@@ -64,7 +64,7 @@ public class KingMoves{
 
     private Boolean validPosition(ChessPosition position, ChessBoard board) {
         ChessGame.TeamColor color = board.getPiece(currentPosition).getTeamColor();
-        if (position.getColumn() <= 8 && position.getColumn() > 0) {
+        if (position.getColumn() <= 8 && position.getColumn() > 0 && position.getRow() <= 8 && position.getRow() > 0 ) {
             return board.IsAvailable(position, color);
         }
         return false;

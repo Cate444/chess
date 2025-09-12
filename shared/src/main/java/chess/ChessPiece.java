@@ -54,7 +54,7 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
        // this is where you will call your other classes
-        HashSet<ChessMove> emptySet = new HashSet<ChessMove>();
+        HashSet<ChessMove> emptySet = new HashSet<>();
         if (board.getPiece(myPosition).getPieceType() == PieceType.KING){
             KingMoves kingObject  = new KingMoves(board, myPosition);
             return kingObject.possibleMoves();
