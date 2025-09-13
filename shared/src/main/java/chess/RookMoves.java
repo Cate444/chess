@@ -3,46 +3,45 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class BishopMoves {
+public class RookMoves {
     ChessBoard board;
     ChessPosition currentPosition;
 
-
-    BishopMoves(ChessBoard board, ChessPosition position){
-        currentPosition = position;
+    public RookMoves(ChessBoard board, ChessPosition position) {
         this.board = board;
+        currentPosition = position;
     }
 
     public Collection<ChessMove> possibleMoves(){
-        System.out.println("hi");
         HashSet<ChessMove> moves = new HashSet<>();
-        //up and right
-        ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn()+1);
+        //up
+        ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn());
         while(validPosition(newPosition, board)[0]){
             moves = addMove(currentPosition, newPosition, moves);
             if (validPosition(newPosition, board)[1]) break;
-            newPosition = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn()+1);
+            newPosition = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn());
         }
-        //down and right
-        newPosition = new ChessPosition(currentPosition.getRow()-1, currentPosition.getColumn()+1);
+        //right
+        newPosition = new ChessPosition(currentPosition.getRow(), currentPosition.getColumn()+1);
         while(validPosition(newPosition, board)[0]){
             moves = addMove(currentPosition, newPosition, moves);
             if (validPosition(newPosition, board)[1]) break;
-            newPosition = new ChessPosition(newPosition.getRow()-1, newPosition.getColumn()+1);
+            newPosition = new ChessPosition(newPosition.getRow(), newPosition.getColumn()+1);
         }
-        //down and left
-        newPosition = new ChessPosition(currentPosition.getRow()-1, currentPosition.getColumn()-1);
+        //down
+        newPosition = new ChessPosition(currentPosition.getRow()-1, currentPosition.getColumn());
+        System.out.println(newPosition);
         while(validPosition(newPosition, board)[0]){
             moves = addMove(currentPosition, newPosition, moves);
             if (validPosition(newPosition, board)[1]) break;
-            newPosition = new ChessPosition(newPosition.getRow()-1, newPosition.getColumn()-1);
+            newPosition = new ChessPosition(newPosition.getRow()-1, newPosition.getColumn());
         }
-        //up and left
-        newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn()-1);
+        //left
+        newPosition = new ChessPosition(currentPosition.getRow(), currentPosition.getColumn()-1);
         while(validPosition(newPosition, board)[0]){
             moves = addMove(currentPosition, newPosition, moves);
             if (validPosition(newPosition, board)[1]) break;
-            newPosition = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn()-1);
+            newPosition = new ChessPosition(newPosition.getRow(), newPosition.getColumn()-1);
         }
         return moves;
     }
@@ -56,8 +55,6 @@ public class BishopMoves {
     private HashSet<ChessMove> addMove(ChessPosition oldPosition, ChessPosition newPosition, HashSet<ChessMove> moves){
         ChessMove newMove = new ChessMove(oldPosition, newPosition, null);
         moves.add(newMove);
-        //System.out.println(newMove);
         return moves;
     }
-
 }
