@@ -14,7 +14,6 @@ public class BishopMoves {
     }
 
     public Collection<ChessMove> possibleMoves(){
-        System.out.println("hi");
         HashSet<ChessMove> moves = new HashSet<>();
         //up and right
         ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn()+1);
