@@ -39,8 +39,10 @@ public class ChessBoard {
     }
 
     public boolean IsAvailable(ChessPosition position, ChessGame.TeamColor color){
-        if (board[position.getRow()-1][position.getColumn()-1] == null || getPiece(position).getTeamColor() != color){
-            return true;
+        if (position.getColumn() <= 8 && position.getColumn() > 0 && position.getRow() <= 8 && position.getRow() > 0) {
+            if (board[position.getRow() - 1][position.getColumn() - 1] == null || getPiece(position).getTeamColor() != color) {
+                return true;
+            }
         }
         return false;
     }
@@ -65,7 +67,9 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        ChessPosition newPosition = new ChessPosition(1,1);
+        ChessPiece Rook1 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        addPiece(newPosition, Rook1);
     }
 
     @Override

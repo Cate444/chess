@@ -67,6 +67,12 @@ public class ChessPiece {
         } else if (board.getPiece(myPosition).getPieceType() == PieceType.QUEEN) {
             QueenMoves queenObject = new QueenMoves(board, myPosition);
             return queenObject.possibleMoves();
+        }else if (board.getPiece(myPosition).getPieceType() == PieceType.KNIGHT) {
+            KnightMoves knightObject = new KnightMoves(board, myPosition);
+            return knightObject.possibleMoves();
+        }else if (board.getPiece(myPosition).getPieceType() == PieceType.PAWN) {
+            PawnMoves pawnObject = new PawnMoves(board, myPosition);
+            return pawnObject.possibleMoves();
         }
         return emptySet;
     }
