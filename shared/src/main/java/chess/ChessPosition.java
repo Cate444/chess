@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class ChessPosition {
 
-    private int row;
-    private int col;
+    int row;
+    int col;
 
     public ChessPosition(int row, int col) {
         this.row = row;
@@ -23,6 +23,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
+
         return row;
     }
 
@@ -56,3 +57,4 @@ public class ChessPosition {
                 '}';
     }
 }
+

@@ -10,16 +10,15 @@ import java.util.Objects;
  */
 public class ChessMove {
 
-   private final ChessPosition startPosition;
-   private final ChessPosition endPosition;
-   private ChessPiece.PieceType promotionPiece;
-
+    ChessPosition startPosition;
+    ChessPosition endPosition;
+    ChessPiece.PieceType promotionsPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
-        this.promotionPiece = promotionPiece;
+        this.promotionsPiece = promotionPiece;
     }
 
     /**
@@ -43,7 +42,7 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        return promotionPiece;
+        return promotionsPiece;
     }
 
     @Override
@@ -52,12 +51,12 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
+        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionsPiece == chessMove.promotionsPiece;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startPosition, endPosition, promotionPiece);
+        return Objects.hash(startPosition, endPosition, promotionsPiece);
     }
 
     @Override
@@ -65,7 +64,7 @@ public class ChessMove {
         return "ChessMove{" +
                 "startPosition=" + startPosition +
                 ", endPosition=" + endPosition +
-                ", promotionPiece=" + promotionPiece +
+                ", promotionsPiece=" + promotionsPiece +
                 '}';
     }
 }

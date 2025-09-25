@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    private ChessPiece[][] board;
+    ChessPiece[][] board;
 
     public ChessBoard() {
         board = new ChessPiece[8][8];
@@ -38,60 +38,47 @@ public class ChessBoard {
         return board[position.getRow()-1][position.getColumn()-1];
     }
 
-    public boolean IsAvailable(ChessPosition position, ChessGame.TeamColor color){
-        if (position.getColumn() <= 8 && position.getColumn() > 0 && position.getRow() <= 8 && position.getRow() > 0) {
-            if (board[position.getRow() - 1][position.getColumn() - 1] == null || getPiece(position).getTeamColor() != color) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Boolean[] IsAvailableWithKill(ChessPosition position, ChessGame.TeamColor color) {
-        //[avaliable, would it result in a kill]
-        Boolean[] availableAndKilled = {false, false};
-        if (position.getColumn() <= 8 && position.getColumn() > 0 && position.getRow() <= 8 && position.getRow() > 0) {
-            if (board[position.getRow() - 1][position.getColumn() - 1] == null) {
-                availableAndKilled[0] = true;
-            } else if (getPiece(position).getTeamColor() != color) {
-                availableAndKilled[0] = true;
-                availableAndKilled[1] = true;
-            }
-        }
-        return availableAndKilled;
-    }
-
-
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        board = new ChessPiece[8][8];
+        addPiece(new ChessPosition(1,1), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(1,8), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(1,2), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(1,7), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(1,3), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(1,6), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(1,4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(1,5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
+        for (int i=1; i<=8; i++){
+            addPiece(new ChessPosition(2,i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+        }
 
-       //Rooks
-        addPiece(new ChessPosition(1,1 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
-        addPiece(new ChessPosition(1,8 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
-        addPiece(new ChessPosition(1,2 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        addPiece(new ChessPosition(1,7 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        addPiece(new ChessPosition(1,3 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(1,6 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(1,4 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(1,5 ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
-        for (int i = 1; i <= 8; i++){
-            addPiece(new ChessPosition(2,i ), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+        addPiece(new ChessPosition(8,1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(8,8), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(8,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(8,7), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(8,3), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(8,6), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(8,4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(8,5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+        for (int i=1; i<=8; i++){
+            addPiece(new ChessPosition(7,i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
-        addPiece(new ChessPosition(8,1 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
-        addPiece(new ChessPosition(8,8 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
-        addPiece(new ChessPosition(8,2 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
-        addPiece(new ChessPosition(8,7 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
-        addPiece(new ChessPosition(8,3 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(8,6 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(8,4 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(8,5 ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
-        for (int i = 1; i <= 8; i++){
-            addPiece(new ChessPosition(7,i ), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+    }
+
+    public Boolean[] isAvailableAndWillKill(ChessPosition position, ChessGame.TeamColor color){
+        Boolean[] returnBool = new Boolean[] {false, false};
+        if (position.getRow() > 0 && position.getRow() <=8 && position.getColumn() >0 && position.getColumn() <=8) {
+            if (getPiece(position) == null) {
+                returnBool[0] = true;
+            } else if (getPiece(position).getTeamColor() != color) {
+                returnBool[0] = true;
+                returnBool[1] = true;
+            }
         }
+        return returnBool;
     }
 
     @Override
@@ -114,6 +101,5 @@ public class ChessBoard {
                 "board=" + Arrays.toString(board) +
                 '}';
     }
-
-
 }
+
