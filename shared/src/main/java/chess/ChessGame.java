@@ -111,7 +111,7 @@ public class ChessGame {
      */
 
     public boolean isInCheck(TeamColor teamColor) {
-       ChessPosition kingPosition = getSpecificPiece(ChessPiece.PieceType.KING, teamColor);
+       ChessPosition kingPosition = getKingPos(teamColor);
         for(int i = 1; i <= 8; i++){
             for(int j = 1; j <= 8; j++){
                 ChessPiece currentPiece = board.getPiece(new ChessPosition(i, j));
@@ -139,23 +139,11 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        ChessPosition kingPos = getSpecificPiece(ChessPiece.PieceType.KING, teamColor);
-        Collection<ChessMove> moves = board.getPiece(kingPos).pieceMoves(board, kingPos);
+        ChessPosition kingPos = getKingPos(teamColor);
+        Collection<ChessMove> moves = validMoves(kingPos);
+        System.out.println(moves);
         return (moves.size() == 0 && isInCheck(teamTurn));
    }
-
-    private ChessPosition getSpecificPiece(ChessPiece.PieceType type, TeamColor teamColor){
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++){
-                ChessPosition aPosition = new ChessPosition(i, j);
-                if(board.getPiece(aPosition) != null && (board.getPiece(aPosition).getPieceType() == type && (board.getPiece(aPosition).getTeamColor() == teamColor))){
-                    return aPosition;
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
@@ -164,8 +152,8 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        ChessPosition kingPos = getSpecificPiece(ChessPiece.PieceType.KING, teamColor);
-        Collection<ChessMove> moves = board.getPiece(kingPos).pieceMoves(board, kingPos);
+        ChessPosition kingPos = getKingPos(teamColor);
+        Collection<ChessMove> moves = validMoves(kingPos);
         return (moves.size() == 0 && !isInCheck(teamTurn));
     }
 
@@ -177,6 +165,20 @@ public class ChessGame {
     public void setBoard(ChessBoard board) {
         this.board = board;
     }
+
+
+    private ChessPosition getKingPos(TeamColor teamColor){
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition aPosition = new ChessPosition(i, j);
+                if(board.getPiece(aPosition) != null && (board.getPiece(aPosition).getPieceType() == ChessPiece.PieceType.KING && (board.getPiece(aPosition).getTeamColor() == teamColor))){
+                    return aPosition;
+                }
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Gets the current chessboard
