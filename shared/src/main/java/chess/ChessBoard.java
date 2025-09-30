@@ -17,6 +17,10 @@ public class ChessBoard {
         board = new ChessPiece[8][8];
     }
 
+    private ChessBoard(ChessPiece[][] currentBoard){
+        board = currentBoard;
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
@@ -97,9 +101,25 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "board=" + Arrays.toString(board) +
-                '}';
+        String boardString = "";
+        for(int i = 0; i <=7; i++ ){
+            for(int j = 0; j <=7; j++ ) {
+                if (board[i][j] == null){
+                    boardString += "np";
+                }else{
+                    boardString += board[i][j].toString();
+                }
+            }
+            boardString += "\n";
+        }
+        return boardString;
     }
+
+    public ChessBoard clone(){
+        ChessBoard boardCopy = new ChessBoard(board);
+        return boardCopy;
+    }
+
+
 }
 
