@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 public class QueenCalc extends CalcMove{
 
@@ -11,7 +10,7 @@ public class QueenCalc extends CalcMove{
 
     @Override
     public Collection<ChessMove> possibleMoves() {
-        Collection<ChessMove> moves = new HashSet<>();
+        Collection<ChessMove> moves;
         moves = new RookCalc(currentPosition, board).possibleMoves();
         moves.addAll(new BishopCalc(currentPosition, board).possibleMoves());
         return moves;

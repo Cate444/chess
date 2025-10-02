@@ -59,7 +59,7 @@ public class PawnCalc extends CalcMove{
     }
 
     @Override
-    Collection<ChessMove> addMove(ChessPosition newPosition, Collection<ChessMove> moves){
+    void addMove(ChessPosition newPosition, Collection<ChessMove> moves){
         if ((teamColor == ChessGame.TeamColor.WHITE && newPosition.getRow() == 8) || (teamColor == ChessGame.TeamColor.BLACK && newPosition.getRow() == 1) ){
             moves.add(new ChessMove(currentPosition, newPosition, ChessPiece.PieceType.QUEEN));
             moves.add(new ChessMove(currentPosition, newPosition, ChessPiece.PieceType.KNIGHT));
@@ -69,7 +69,6 @@ public class PawnCalc extends CalcMove{
         } else {
             moves.add(new ChessMove(currentPosition, newPosition, null));
         }
-        return moves;
     }
 
 }

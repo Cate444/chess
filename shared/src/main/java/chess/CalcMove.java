@@ -16,8 +16,7 @@ public abstract class CalcMove {
     public abstract Collection<ChessMove>  possibleMoves();
 
     //override for pawn
-    Collection<ChessMove> addMove(ChessPosition newPosition, Collection<ChessMove> moves){
+    void addMove(ChessPosition newPosition, Collection<ChessMove> moves){
         moves.add(new ChessMove(currentPosition, newPosition, null));
-        return moves;
     }
 }

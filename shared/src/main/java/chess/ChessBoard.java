@@ -102,23 +102,22 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        String boardString = "";
+        StringBuilder boardString = new StringBuilder();
         for(int i = 0; i <=7; i++ ){
             for(int j = 0; j <=7; j++ ) {
                 if (board[i][j] == null){
-                    boardString += "np";
+                    boardString.append("np");
                 }else{
-                    boardString += board[i][j].toString();
+                    boardString.append(board[i][j].toString());
                 }
             }
-            boardString += "\n";
+            boardString.append("\n");
         }
-        return boardString;
+        return boardString.toString();
     }
 
     public ChessBoard clone(){
-        ChessBoard boardCopy = new ChessBoard(board);
-        return boardCopy;
+        return new ChessBoard(board);
     }
 
 
