@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import io.javalin.*;
 import io.javalin.http.Context;
+import io.javalin.http.Handler;
 
 public class Server {
 
@@ -14,13 +15,13 @@ public class Server {
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", ctx -> ctx.result("{}"));
-        server.post("user", ctx -> register(ctx));
-        server.post("session", ctx -> login(ctx));
-        server.delete("session", ctx -> ctx.result("{}")); //logout
-        server.get("game", ctx -> listGames(ctx));
-        server.post("game", ctx -> createGame(ctx));
-        server.put("game", ctx -> ctx.result("{}")); //join
+        server.delete("db", ctx -> ctx.result("{}")); //clear
+        server.post("user", this::register);
+        server.post("session", this ::login);
+        server.delete("session", this::logout);
+        server.get("game", this::listGames);
+        server.post("game", this::createGame);
+        server.put("game", this::join); //join
     }
 
     private void register(Context ctx){
@@ -45,12 +46,15 @@ public class Server {
         ctx.result(serializer.toJson(res));
     }
 
-//    private void logout(Context ctx){
-//        var serializer = new Gson();
-//        String reqJason = ctx.body();
-//        var req = serializer.fromJson(reqJason, Map.class);
-//
-//    }
+    private void logout(Context ctx){
+        var serializer = new Gson();
+        String reqJason = ctx.body();
+        var req = serializer.fromJson(reqJason, Map.class);
+
+        // call to server to logout
+
+        ctx.result();
+    }
 
     private void createGame(Context ctx){
         var serializer = new Gson();
@@ -72,6 +76,15 @@ public class Server {
 
         var res = Map.of("games", List.of());
         ctx.result(serializer.toJson(res));
+    }
+
+    private void join(Context ctx){
+        var serializer = new Gson();
+        String reqJason = ctx.body();
+        var req = serializer.fromJson(reqJason, Map.class);
+
+        //call to server to join a game
+        ctx.result();
     }
 
     public int run(int desiredPort) {
