@@ -4,15 +4,19 @@ import com.google.gson.Gson;
 
 import java.util.List;
 import java.util.Map;
+
+import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
-import io.javalin.http.Handler;
+import service.UserService;
 
 public class Server {
 
     private final Javalin server;
+    private final UserService userService;
 
     public Server() {
+        userService = new UserService();
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         server.delete("db", ctx -> ctx.result("{}")); //clear
@@ -21,18 +25,16 @@ public class Server {
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
-        server.put("game", this::join); //join
+        server.put("game", this::join);
     }
 
     private void register(Context ctx){
         var serializer = new Gson();
         String reqJason = ctx.body();
-        var req = serializer.fromJson(reqJason, Map.class);
+        var user = serializer.fromJson(reqJason, UserData.class);
+        var authData = userService.register(user);
 
-        //call to server and register
-
-        var res = Map.of("username", req.get("username"), "authToken", "yzx");
-        ctx.result(serializer.toJson(res));
+        ctx.result(serializer.toJson(authData));
     }
 
     private void login(Context ctx){
