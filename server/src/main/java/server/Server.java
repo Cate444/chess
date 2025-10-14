@@ -35,23 +35,35 @@ public class Server {
             var serializer = new Gson();
             String reqJason = ctx.body();
             UserData user = serializer.fromJson(reqJason, UserData.class);
-            var authData = userService.register(user);
+            AuthData authData = userService.register(user);
             ctx.result(serializer.toJson(authData));
-        } catch (Exception ex){
-            var msg = String.format("{\"message\": \"Error: already taken\"}", ex.getMessage());
-            ctx.status(403).result(msg);
+        } catch (Exception ex) {
+            if (ex.getMessage() == "Already exists") {
+                var msg = String.format("{\"message\": \"Error: already taken\"}", ex.getMessage());
+                ctx.status(403).result(msg);
+            } else if (ex.getMessage() == "no password") {
+                var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
+                ctx.status(400).result(msg);
+            }
         }
     }
 
     private void login(Context ctx){
-        var serializer = new Gson();
-        String reqJason = ctx.body();
-        var req = serializer.fromJson(reqJason, Map.class);
-
-        //call to server to login
-
-        var res = Map.of("username", req.get("username"), "authToken", "yzx");
-        ctx.result(serializer.toJson(res));
+        try {
+            var serializer = new Gson();
+            String reqJason = ctx.body();
+            UserData user = serializer.fromJson(reqJason, UserData.class);
+            AuthData authData = userService.login(user);
+            ctx.result(serializer.toJson(authData));
+        } catch (Exception ex){
+            if (ex.getMessage() == "user doesn't exist") {
+                var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
+                ctx.status(401).result(msg);
+            } else if (ex.getMessage() == "wrong password") {
+                var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
+                ctx.status(400).result(msg);
+            }
+        }
     }
 
     private void logout(Context ctx){
