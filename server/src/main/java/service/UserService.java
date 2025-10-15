@@ -22,14 +22,14 @@ public class UserService {
     }
 
     public AuthData login(UserData user) throws Exception{
-        if (dataAccess.getUser(user.username()) == null){
-            throw new Exception("user doesn't exist");
+        if (user.username() == null || user.password() == null){
+            throw new Exception("bad request");
         }
-        Boolean authenticated = dataAccess.authenticate(user);
-        if(!authenticated){
-            throw new Exception("wrong password");
+        UserData userdata = dataAccess.getUser(user.username());
+        if (userdata == null || !userdata.password().equals(user.password())){
+            throw new Exception("user doesnt exist");
         }
-        String authToken = dataAccess.getAuthToken(user.username());
+        //String authToken = dataAccess.getAuthToken(user.username());
         return new AuthData(user.username(), generateAuthToken());
     }
 

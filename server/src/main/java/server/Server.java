@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dataaccess.MemoryDataAccess;
 import datamodel.*;
@@ -56,11 +57,11 @@ public class Server {
             AuthData authData = userService.login(user);
             ctx.result(serializer.toJson(authData));
         } catch (Exception ex){
-            if (ex.getMessage() == "user doesn't exist") {
-                var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
+            if (Objects.equals(ex.getMessage(), "user doesnt exist")) {
+                var msg = String.format("{ \"message\": \"Error: unauthorizedn\" }", ex.getMessage());
                 ctx.status(401).result(msg);
-            } else if (ex.getMessage() == "wrong password") {
-                var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
+            } else if (Objects.equals(ex.getMessage(), "bad request")) {
+                var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
                 ctx.status(400).result(msg);
             }
         }

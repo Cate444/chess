@@ -20,7 +20,6 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public UserData getUser(String username) {
-        System.out.println(users.get(username));
         return users.get(username);
     }
 
