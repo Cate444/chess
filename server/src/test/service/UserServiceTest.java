@@ -58,5 +58,8 @@ class UserServiceTest {
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         var authData = service.register(user);
+
+        assertEquals(user.username(), authData.username());
+        assertFalse(authData.authToken().isEmpty());
     }
 }
