@@ -30,24 +30,24 @@ class UserServiceTest {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
 
-        var user = new UserData(null, "j@j.com", "passThisWord");
+        var userWithNoName = new UserData(null, "j@j.com", "passThisWord");
         Exception exception = assertThrows(Exception.class, () -> {
-            service.register(user);
+            service.register(userWithNoName);
         });
         assertEquals("no username", exception.getMessage());
 
-        var user2 = new UserData("Jane", "j@j.com", null);
+        var userWithNoPassword = new UserData("Jane", "j@j.com", null);
         Exception exception2 = assertThrows(Exception.class, () -> {
-            service.register(user2);
+            service.register(userWithNoPassword);
         });
         assertEquals("no password", exception2.getMessage());
 
 
         var goodUser = new UserData("Jane", "j@j.com", "ThisIsAPassword");
         service.register(goodUser);
-        var user3 = new UserData("Jane", "j@j.com", "ThisIsAPassword");;
+        var userAlreadyExists = new UserData("Jane", "j@j.com", "ThisIsAPassword");;
         Exception exception3 = assertThrows(Exception.class, () -> {
-            service.register(user3);
+            service.register(userAlreadyExists);
         });
         assertEquals("Already exists", exception3.getMessage());
     }
@@ -57,9 +57,24 @@ class UserServiceTest {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
-        var authData = service.register(user);
-
+        service.register(user);
+        var authData = service.login(user);
         assertEquals(user.username(), authData.username());
         assertFalse(authData.authToken().isEmpty());
+    }
+
+    @Test
+    void loginInvalidUser() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var userDoesntExist = new UserData("joe", "j@j.com", "passThisWord");
+        Exception exception = assertThrows(Exception.class, () -> service.login(userDoesntExist));
+        assertEquals("user doesnt exist", exception.getMessage());
+
+       service.register(userDoesntExist);
+
+        var userWithWrongPassword = new UserData("joe", "j@j.com", "notThisPassWord");
+        assertThrows(Exception.class, () -> service.login(userWithWrongPassword));
+
     }
 }
