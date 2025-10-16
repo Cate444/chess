@@ -14,6 +14,9 @@ public class UserService {
     public AuthData register(UserData user) throws Exception{
         if(user.password() == null ){
             throw new Exception("no password");
+        } if (user.username() == null){
+            throw new Exception("no username");
+
         } if(dataAccess.getUser(user.username()) != null){
             throw new Exception("Already exists");
         }

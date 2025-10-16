@@ -15,7 +15,7 @@ class UserServiceTest {
    }
 
     @Test
-    void register() throws Exception{
+    void register() throws Exception {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
@@ -26,6 +26,28 @@ class UserServiceTest {
     }
 
     @Test
-    void login() {
+    void registerInvalidUsername() {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+
+        var user = new UserData(null, "j@j.com", "passThisWord");
+        Exception exception = assertThrows(Exception.class, () -> {
+            service.register(user);
+        });
+        assertEquals("no username", exception.getMessage());
+
+        var user2 = new UserData("Jane", "j@j.com", null);
+        Exception exception2 = assertThrows(Exception.class, () -> {
+            service.register(user2);
+        });
+        assertEquals("no password", exception2.getMessage());
+    }
+
+    @Test
+    void login() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var user = new UserData("joe", "j@j.com", "passThisWord");
+        var authData = service.register(user);
     }
 }

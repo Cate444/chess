@@ -45,6 +45,9 @@ public class Server {
             } else if (ex.getMessage() == "no password") {
                 var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
                 ctx.status(400).result(msg);
+            } else if (ex.getMessage() == "no username") {
+                var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
+                ctx.status(400).result(msg);
             }
         }
     }
