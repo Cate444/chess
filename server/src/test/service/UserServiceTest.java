@@ -26,7 +26,7 @@ class UserServiceTest {
     }
 
     @Test
-    void registerInvalidUsername() {
+    void registerInvalidUsername() throws Exception{
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
 
@@ -41,6 +41,15 @@ class UserServiceTest {
             service.register(user2);
         });
         assertEquals("no password", exception2.getMessage());
+
+
+        var goodUser = new UserData("Jane", "j@j.com", "ThisIsAPassword");
+        service.register(goodUser);
+        var user3 = new UserData("Jane", "j@j.com", "ThisIsAPassword");;
+        Exception exception3 = assertThrows(Exception.class, () -> {
+            service.register(user3);
+        });
+        assertEquals("Already exists", exception3.getMessage());
     }
 
     @Test
