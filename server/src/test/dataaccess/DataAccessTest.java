@@ -30,4 +30,13 @@ class DataAccessTest {
     @Test
     void getAuthToken() {
     }
+
+    @Test
+    void logout() throws Exception{
+        DataAccess db = new MemoryDataAccess();
+        UserData user = new UserData("joe", "j@j.com", "passThisWord");
+        db.createUser(user);
+        String authToken = db.createAuthToken(user.username());
+        assertDoesNotThrow(() -> db.logout(authToken));
+    }
 }

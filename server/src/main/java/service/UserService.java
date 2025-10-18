@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import datamodel.AuthData;
 import datamodel.UserData;
 
@@ -32,12 +33,19 @@ public class UserService {
         if (userdata == null || !userdata.password().equals(user.password())){
             throw new Exception("user doesnt exist");
         }
-        //String authToken = dataAccess.getAuthToken(user.username());
         return new AuthData(user.username(), dataAccess.createAuthToken(user.username()));
     }
 
-    public void logout(UserData user) throws Exception{
-
+    public void logout(String authToken) throws Exception{
+//        if (authToken == null){
+//            return;
+//        }
+        System.out.println(authToken);
+        try {
+            dataAccess.logout(authToken);
+        } catch (Exception ex){
+            throw ex;
+        }
 
     }
 }

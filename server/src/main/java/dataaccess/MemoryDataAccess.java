@@ -25,23 +25,20 @@ public class MemoryDataAccess implements DataAccess{
         return users.get(username);
     }
 
-    public String getAuthToken(String username){
-        return authTokenUserMap.get(username);
-    }
 
     @Override
     public String createAuthToken(String username){
         String authToken = UUID.randomUUID().toString();
-        authTokenUserMap.put(username, authToken);
+        authTokenUserMap.put(authToken, username);
         return authToken;
     }
 
     @Override
-    public Boolean authenticate(UserData user) {
-        UserData userData = users.get(user);
-        if (user.password() == userData.password()){
-            return true;
+    public void logout(String authToken) throws Exception {
+        if (!authTokenUserMap.containsKey(authToken)){
+            throw new DataAccessException("Unauthorized");
         }
-        return false;
+        authTokenUserMap.remove(authToken);
     }
+
 }

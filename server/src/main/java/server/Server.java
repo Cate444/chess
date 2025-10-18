@@ -72,13 +72,15 @@ public class Server {
 
     private void logout(Context ctx){
         try {
-            var serializer = new Gson();
-            String reqJason = ctx.body();
-            UserData user = serializer.fromJson(reqJason, UserData.class);
-            userService.logout(user);
+            String authToken = ctx.header("Authorization");
+            System.out.println(authToken);
+            userService.logout(authToken);
             ctx.result();
         }catch (Exception ex){
-
+            if (Objects.equals(ex.getMessage(), "Unauthorized")) {
+                var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
+                ctx.status(401).result(msg);
+            }
         }
     }
 
