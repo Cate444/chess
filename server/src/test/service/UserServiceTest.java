@@ -77,4 +77,6 @@ class UserServiceTest {
         assertThrows(Exception.class, () -> service.login(userWithWrongPassword));
 
     }
+
+
 }

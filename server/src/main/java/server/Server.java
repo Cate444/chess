@@ -71,13 +71,15 @@ public class Server {
     }
 
     private void logout(Context ctx){
-        var serializer = new Gson();
-        String reqJason = ctx.body();
-        var req = serializer.fromJson(reqJason, Map.class);
+        try {
+            var serializer = new Gson();
+            String reqJason = ctx.body();
+            UserData user = serializer.fromJson(reqJason, UserData.class);
+            userService.logout(user);
+            ctx.result();
+        }catch (Exception ex){
 
-        // call to server to logout
-
-        ctx.result();
+        }
     }
 
     private void createGame(Context ctx){

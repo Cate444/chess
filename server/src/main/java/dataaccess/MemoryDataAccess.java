@@ -4,9 +4,11 @@ import datamodel.UserData;
 
 import java.util.HashMap;
 
+import java.util.UUID;
+
 public class MemoryDataAccess implements DataAccess{
     private final HashMap<String, UserData> users = new HashMap<>();
-    private final HashMap<String, String> authTokenUserDataHashMap = new HashMap<>();
+    private final HashMap<String, String> authTokenUserMap = new HashMap<>();
 
     @Override
     public void clear() {
@@ -24,7 +26,14 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     public String getAuthToken(String username){
-        return "xyz";
+        return authTokenUserMap.get(username);
+    }
+
+    @Override
+    public String createAuthToken(String username){
+        String authToken = UUID.randomUUID().toString();
+        authTokenUserMap.put(username, authToken);
+        return authToken;
     }
 
     @Override

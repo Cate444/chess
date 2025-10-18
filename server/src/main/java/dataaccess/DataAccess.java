@@ -8,5 +8,6 @@ public interface DataAccess {
     UserData getUser(String username);
     String getAuthToken(String username);
     Boolean authenticate(UserData user);
+    String createAuthToken(String username);
 
 }

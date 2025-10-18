@@ -21,7 +21,7 @@ public class UserService {
             throw new Exception("Already exists");
         }
         dataAccess.createUser(user);
-        return new AuthData(user.username(), generateAuthToken());
+        return new AuthData(user.username(), dataAccess.createAuthToken(user.username()));
     }
 
     public AuthData login(UserData user) throws Exception{
@@ -33,11 +33,11 @@ public class UserService {
             throw new Exception("user doesnt exist");
         }
         //String authToken = dataAccess.getAuthToken(user.username());
-        return new AuthData(user.username(), generateAuthToken());
+        return new AuthData(user.username(), dataAccess.createAuthToken(user.username()));
     }
 
-    private String generateAuthToken(){
-        return "xyz";
-    }
+    public void logout(UserData user) throws Exception{
 
+
+    }
 }
