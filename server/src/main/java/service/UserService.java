@@ -37,15 +37,19 @@ public class UserService {
     }
 
     public void logout(String authToken) throws Exception{
-//        if (authToken == null){
-//            return;
-//        }
         System.out.println(authToken);
         try {
             dataAccess.logout(authToken);
         } catch (Exception ex){
             throw ex;
         }
+    }
 
+    public int createGame(String authToken){
+        return 1;
+    }
+
+    public void clear(){
+        dataAccess.clear();
     }
 }

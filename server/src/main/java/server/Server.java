@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import datamodel.*;
 import io.javalin.*;
@@ -22,13 +24,17 @@ public class Server {
         userService = new UserService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", ctx -> ctx.result("{}")); //clear
+        server.delete("db", this::clear); //clear
         server.post("user", this::register);
         server.post("session", this ::login);
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::join);
+    }
+
+    private void clear(Context ctx){
+        userService.clear();
     }
 
     private void register(Context ctx){
@@ -86,12 +92,14 @@ public class Server {
 
     private void createGame(Context ctx){
         var serializer = new Gson();
-        String reqJason = ctx.body();
-        var req = serializer.fromJson(reqJason, Map.class);
+        String authToken = ctx.header("Authorization");
+        int gameID = userService.createGame(authToken);
+//        String reqJason = ctx.body();
+//        var req = serializer.fromJson(reqJason, Map.class);
 
         //call to server to create a game
 
-        var res = Map.of("gameID", 1234);
+        var res = Map.of("gameID", gameID);
         ctx.result(serializer.toJson(res));
     }
 
