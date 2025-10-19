@@ -5,8 +5,11 @@ import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import datamodel.GameName;
 import datamodel.JoinInfo;
+import datamodel.ReturnGameData;
 import datamodel.UserData;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,5 +67,31 @@ class GameServiceTest {
         userService.register(user);
         var authData = userService.login(user);
         assertThrows(Exception.class,() -> gameService.createGame(authData.authToken(), new GameName(null)));
+    }
+
+
+    @Test
+    void listGames() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService userService = new UserService(db);
+        GameService gameService = new GameService(db);
+        var user = new UserData("Eva", "Eva@faith.com", "theBabes");
+        userService.register(user);
+        var authData = userService.login(user);
+        int gameID = gameService.createGame(authData.authToken(), new GameName("aGame"));
+        int gameID2 = gameService.createGame(authData.authToken(), new GameName("anotherGame"));
+        ArrayList<ReturnGameData> games = gameService.listGames(authData.authToken());
+        assertEquals(games.size(), 2);
+    }
+
+    @Test
+    void unAuthorizedListGames() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService userService = new UserService(db);
+        GameService gameService = new GameService(db);
+        var user = new UserData("Eva", "Eva@faith.com", "theBabes");
+        userService.register(user);
+        var authData = userService.login(user);
+        assertThrows(Exception.class,() -> gameService.listGames(authData.username()));
     }
 }
