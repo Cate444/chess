@@ -105,6 +105,9 @@ public class Server {
            if (Objects.equals(ex.getMessage(), "Unauthorized")) {
                var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
                ctx.status(401).result(msg);
+           }  if (Objects.equals(ex.getMessage(), "bad request")) {
+               var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
+               ctx.status(400).result(msg);
            }
        }
     }
