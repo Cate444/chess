@@ -1,7 +1,11 @@
 package service;
 
 import dataaccess.DataAccess;
+import datamodel.GameData;
 import datamodel.GameName;
+import datamodel.JoinInfo;
+
+import java.util.HashSet;
 
 public class GameService {
     private final DataAccess dataAccess;
@@ -17,6 +21,12 @@ public class GameService {
         }
         int gameID = dataAccess.createGame(gameName);
         return gameID;
+    }
+
+    public void joinGame(String authToken, JoinInfo joinInfo) throws Exception{
+        String username = dataAccess.authenticate(authToken);
+        dataAccess.join(joinInfo, username);
+        return;
     }
 
     public void clear(){

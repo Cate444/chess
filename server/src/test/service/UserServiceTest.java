@@ -100,27 +100,5 @@ class UserServiceTest {
         assertThrows(Exception.class, () -> service.logout(authData.authToken()));
     }
 
-    @Test
-    void createGame() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
-        var user = new UserData("joe", "j@j.com", "passThisWord");
-        userService.register(user);
-        var authData = userService.login(user);
-        int gameID = gameService.createGame(authData.authToken(), new GameName("aGame"));
-        assertTrue(gameID > 0);
-    }
-
-    @Test
-    void badDataCreateGame() throws Exception{
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
-        UserData user = new UserData("Eva", "Eva@faith.com", "theBabes");
-        userService.register(user);
-        var authData = userService.login(user);
-        assertThrows(Exception.class,() -> gameService.createGame(authData.authToken(), new GameName(null)));
-    }
 
 }

@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -123,13 +124,26 @@ public class Server {
         ctx.result(serializer.toJson(res));
     }
 
-    private void join(Context ctx){
-        var serializer = new Gson();
-        String reqJason = ctx.body();
-        var req = serializer.fromJson(reqJason, Map.class);
-
-        //call to server to join a game
-        ctx.result();
+    private void join(Context ctx) {
+       try {
+           var serializer = new Gson();
+           String reqJason = ctx.body();
+           JoinInfo joinInfo = serializer.fromJson(reqJason, JoinInfo.class);
+           String authToken = ctx.header("Authorization");
+           gameService.joinGame(authToken, joinInfo);
+           ctx.result();
+       } catch (Exception ex){
+           if (Objects.equals(ex.getMessage(), "Unauthorized")) {
+               var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
+               ctx.status(401).result(msg);
+           }if (Objects.equals(ex.getMessage(), "bad request")) {
+               var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
+               ctx.status(400).result(msg);
+           } if (Objects.equals(ex.getMessage(), "already taken")) {
+               var msg = String.format("{ \"message\": \"Error: already taken\" }", ex.getMessage());
+               ctx.status(403).result(msg);
+           }
+       }
     }
 
     public int run(int desiredPort) {
