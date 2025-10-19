@@ -1,155 +1,144 @@
 package server;
 
 import com.google.gson.Gson;
-
-import java.util.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 import dataaccess.MemoryDataAccess;
 import datamodel.*;
-import io.javalin.*;
-import io.javalin.http.Context;
 import service.GameService;
 import service.UserService;
+
+import java.util.*;
 
 public class Server {
 
     private final Javalin server;
     private final UserService userService;
     private final GameService gameService;
+    private final Gson gson = new Gson();
 
     public Server() {
         var dataAccess = new MemoryDataAccess();
-        userService = new UserService(dataAccess);
-        gameService = new GameService(dataAccess);
-        server = Javalin.create(config -> config.staticFiles.add("web"));
+        this.userService = new UserService(dataAccess);
+        this.gameService = new GameService(dataAccess);
+        this.server = Javalin.create(config -> config.staticFiles.add("web"));
 
+        // Route mappings
         server.delete("db", this::clear);
         server.post("user", this::register);
-        server.post("session", this ::login);
+        server.post("session", this::login);
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::join);
     }
 
-    private void clear(Context ctx){
+    private <T> T readJson(Context ctx, Class<T> clazz) {
+        return gson.fromJson(ctx.body(), clazz);
+    }
+
+    private void writeJson(Context ctx, Object obj) {
+        ctx.result(gson.toJson(obj));
+    }
+
+    private void sendError(Context ctx, int status, String message) {
+        var res = Map.of("message", "Error: " + message);
+        ctx.status(status).result(gson.toJson(res));
+    }
+
+
+    private void clear(Context ctx) {
         userService.clear();
         gameService.clear();
+        ctx.status(200);
     }
 
-    private void register(Context ctx){
+    private void register(Context ctx) {
         try {
-            var serializer = new Gson();
-            String reqJason = ctx.body();
-            UserData user = serializer.fromJson(reqJason, UserData.class);
+            UserData user = readJson(ctx, UserData.class);
             AuthData authData = userService.register(user);
-            ctx.result(serializer.toJson(authData));
+            writeJson(ctx, authData);
         } catch (Exception ex) {
-            if (ex.getMessage() == "Already exists") {
-                var msg = String.format("{\"message\": \"Error: already taken\"}", ex.getMessage());
-                ctx.status(403).result(msg);
-            } else if (ex.getMessage() == "no password") {
-                var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
-                ctx.status(400).result(msg);
-            } else if (ex.getMessage() == "no username") {
-                var msg = String.format("{ \"message\": \"Error: bad request\" }", ex.getMessage());
-                ctx.status(400).result(msg);
+            switch (ex.getMessage()) {
+                case "Already exists" -> sendError(ctx, 403, "already taken");
+                case "no password", "no username" -> sendError(ctx, 400, "bad request");
+                default -> sendError(ctx, 500, "internal server error");
             }
         }
     }
 
-    private void login(Context ctx){
+    private void login(Context ctx) {
         try {
-            var serializer = new Gson();
-            String reqJason = ctx.body();
-            UserData user = serializer.fromJson(reqJason, UserData.class);
+            UserData user = readJson(ctx, UserData.class);
             AuthData authData = userService.login(user);
-            ctx.result(serializer.toJson(authData));
-        } catch (Exception ex){
-            if (Objects.equals(ex.getMessage(), "user doesnt exist")) {
-                var msg = String.format("{ \"message\": \"Error: unauthorizedn\" }", ex.getMessage());
-                ctx.status(401).result(msg);
-            } else if (Objects.equals(ex.getMessage(), "bad request")) {
-                var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
-                ctx.status(400).result(msg);
+            writeJson(ctx, authData);
+        } catch (Exception ex) {
+            switch (ex.getMessage()) {
+                case "user doesnt exist" -> sendError(ctx, 401, "unauthorized");
+                case "bad request" -> sendError(ctx, 400, "bad request");
+                default -> sendError(ctx, 500, "internal server error");
             }
         }
     }
 
-    private void logout(Context ctx){
+    private void logout(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
             userService.logout(authToken);
-            ctx.result();
-        }catch (Exception ex){
-            if (Objects.equals(ex.getMessage(), "Unauthorized")) {
-                var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
-                ctx.status(401).result(msg);
+            ctx.status(200);
+        } catch (Exception ex) {
+            if ("Unauthorized".equals(ex.getMessage())) {
+                sendError(ctx, 401, "unauthorized");
+            } else {
+                sendError(ctx, 500, "internal server error");
             }
         }
     }
 
-    private void createGame(Context ctx) throws Exception{
-       try {
-           var serializer = new Gson();
-           String reqJason = ctx.body();
-           GameName gameName = serializer.fromJson(reqJason, GameName.class);
-           String authToken = ctx.header("Authorization");
-           int gameID = gameService.createGame(authToken, gameName);
-           var res = Map.of("gameID", gameID);
-           ctx.result(serializer.toJson(res));
-       } catch (Exception ex){
-           if (Objects.equals(ex.getMessage(), "Unauthorized")) {
-               var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
-               ctx.status(401).result(msg);
-           }  if (Objects.equals(ex.getMessage(), "bad request")) {
-               var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
-               ctx.status(400).result(msg);
-           }
-       }
+    private void createGame(Context ctx) {
+        try {
+            GameName gameName = readJson(ctx, GameName.class);
+            String authToken = ctx.header("Authorization");
+            int gameID = gameService.createGame(authToken, gameName);
+            writeJson(ctx, Map.of("gameID", gameID));
+        } catch (Exception ex) {
+            switch (ex.getMessage()) {
+                case "Unauthorized" -> sendError(ctx, 401, "unauthorized");
+                case "bad request" -> sendError(ctx, 400, "bad request");
+                default -> sendError(ctx, 500, "internal server error");
+            }
+        }
     }
 
-    private void listGames(Context ctx) throws Exception {
+    private void listGames(Context ctx) {
         try {
-            var serializer = new Gson();
             String authToken = ctx.header("Authorization");
             ArrayList<ReturnGameData> games = gameService.listGames(authToken);
-            var res = Map.of("games", games);
-
-            // Proper JSON output
-            String json = serializer.toJson(res);
-            System.out.println(json);
-
-            ctx.result(json);
+            writeJson(ctx, Map.of("games", games));
         } catch (Exception ex) {
-            if (Objects.equals(ex.getMessage(), "Unauthorized")) {
-                var msg = "{ \"message\": \"Error: unauthorized\" }";
-                ctx.status(401).result(msg);
+            if ("Unauthorized".equals(ex.getMessage())) {
+                sendError(ctx, 401, "unauthorized");
+            } else {
+                sendError(ctx, 500, "internal server error");
             }
         }
     }
 
-
     private void join(Context ctx) {
-       try {
-           var serializer = new Gson();
-           String reqJason = ctx.body();
-           JoinInfo joinInfo = serializer.fromJson(reqJason, JoinInfo.class);
-           String authToken = ctx.header("Authorization");
-           gameService.joinGame(authToken, joinInfo);
-           ctx.result();
-       } catch (Exception ex){
-           if (Objects.equals(ex.getMessage(), "Unauthorized")) {
-               var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
-               ctx.status(401).result(msg);
-           }if (Objects.equals(ex.getMessage(), "bad request")) {
-               var msg = String.format("{ \"message\": \"Error: unauthorized\" }", ex.getMessage());
-               ctx.status(400).result(msg);
-           } if (Objects.equals(ex.getMessage(), "already taken")) {
-               var msg = String.format("{ \"message\": \"Error: already taken\" }", ex.getMessage());
-               ctx.status(403).result(msg);
-           }
-       }
+        try {
+            JoinInfo joinInfo = readJson(ctx, JoinInfo.class);
+            String authToken = ctx.header("Authorization");
+            gameService.joinGame(authToken, joinInfo);
+            ctx.status(200);
+        } catch (Exception ex) {
+            switch (ex.getMessage()) {
+                case "Unauthorized" -> sendError(ctx, 401, "unauthorized");
+                case "bad request" -> sendError(ctx, 400, "bad request");
+                case "already taken" -> sendError(ctx, 403, "already taken");
+                default -> sendError(ctx, 500, "internal server error");
+            }
+        }
     }
 
     public int run(int desiredPort) {

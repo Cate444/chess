@@ -117,7 +117,7 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(pos);
 
-                if (piece == null || piece.getTeamColor() == teamColor) continue;
+                if (piece == null || piece.getTeamColor() == teamColor) {continue;}
 
                 for (ChessMove move : piece.pieceMoves(board, pos)) {
                     if (move.getEndPosition().equals(kingPos)) {
@@ -137,7 +137,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheck(teamColor)) return false;
+        if (!isInCheck(teamColor)) {return false;}
         return !canMyTeamMove(teamColor);
     }
     /**
@@ -211,8 +211,8 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
         ChessGame chessGame = (ChessGame) o;
         return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board);
     }

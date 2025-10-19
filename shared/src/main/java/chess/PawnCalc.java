@@ -16,20 +16,26 @@ public class PawnCalc extends CalcMove{
             if(currentPosition.getRow() == 2){
                 ChessPosition newPosition = new ChessPosition(4, currentPosition.getColumn());
                 ChessPosition betweenPosition = new ChessPosition(3, currentPosition.getColumn());
-                if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1] && board.isAvailableAndWillKill(betweenPosition, teamColor)[0] && !board.isAvailableAndWillKill(betweenPosition, teamColor)[1]){
+                if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                        !board.isAvailableAndWillKill(newPosition, teamColor)[1] &&
+                        board.isAvailableAndWillKill(betweenPosition, teamColor)[0] &&
+                        !board.isAvailableAndWillKill(betweenPosition, teamColor)[1]){
                     addMove(newPosition,moves);
                 }
             }
-            ChessPosition newPosition = new ChessPosition(currentPosition.getRow() + 1, currentPosition.getColumn());
-            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1]){
+            ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn());
+            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                    !board.isAvailableAndWillKill(newPosition, teamColor)[1]){
                 addMove(newPosition, moves);
             }
-            newPosition = new ChessPosition(currentPosition.getRow() + 1, currentPosition.getColumn()+1);
-            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && board.isAvailableAndWillKill(newPosition, teamColor)[1]){
+            newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn()+1);
+            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                    board.isAvailableAndWillKill(newPosition, teamColor)[1]){
                 addMove(newPosition, moves);
             }
-            newPosition = new ChessPosition(currentPosition.getRow() + 1, currentPosition.getColumn()-1);
-            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && board.isAvailableAndWillKill(newPosition, teamColor)[1]){
+            newPosition = new ChessPosition(currentPosition.getRow()+1, currentPosition.getColumn()-1);
+            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                    board.isAvailableAndWillKill(newPosition, teamColor)[1]){
                 addMove(newPosition, moves);
             }
 
@@ -37,20 +43,26 @@ public class PawnCalc extends CalcMove{
             if(currentPosition.getRow() == 7){
                 ChessPosition newPosition = new ChessPosition(5, currentPosition.getColumn());
                 ChessPosition betweenPosition = new ChessPosition(6, currentPosition.getColumn());
-                if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1] && board.isAvailableAndWillKill(betweenPosition, teamColor)[0] && !board.isAvailableAndWillKill(betweenPosition, teamColor)[1]){
+                if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                        !board.isAvailableAndWillKill(newPosition, teamColor)[1] &&
+                        board.isAvailableAndWillKill(betweenPosition, teamColor)[0] &&
+                        !board.isAvailableAndWillKill(betweenPosition, teamColor)[1]){
                     addMove(newPosition,moves);
                 }
             }
-            ChessPosition newPosition = new ChessPosition(currentPosition.getRow() - 1, currentPosition.getColumn());
-            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1]){
+            ChessPosition newPosition = new ChessPosition(currentPosition.getRow()-1, currentPosition.getColumn());
+            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                    !board.isAvailableAndWillKill(newPosition, teamColor)[1]){
                 addMove(newPosition, moves);
             }
-            newPosition = new ChessPosition(currentPosition.getRow() - 1, currentPosition.getColumn()+1);
-            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && board.isAvailableAndWillKill(newPosition, teamColor)[1]){
+            newPosition = new ChessPosition(currentPosition.getRow()-1, currentPosition.getColumn()+1);
+            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                    board.isAvailableAndWillKill(newPosition, teamColor)[1]){
                 addMove(newPosition, moves);
             }
-            newPosition = new ChessPosition(currentPosition.getRow() - 1, currentPosition.getColumn()-1);
-            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] && board.isAvailableAndWillKill(newPosition, teamColor)[1]){
+            newPosition = new ChessPosition(currentPosition.getRow()-1, currentPosition.getColumn()-1);
+            if(board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                    board.isAvailableAndWillKill(newPosition, teamColor)[1]){
                 addMove(newPosition, moves);
             }
         }
@@ -60,7 +72,8 @@ public class PawnCalc extends CalcMove{
 
     @Override
     void addMove(ChessPosition newPosition, Collection<ChessMove> moves){
-        if ((teamColor == ChessGame.TeamColor.WHITE && newPosition.getRow() == 8) || (teamColor == ChessGame.TeamColor.BLACK && newPosition.getRow() == 1) ){
+        if ((teamColor == ChessGame.TeamColor.WHITE && newPosition.getRow() == 8) ||
+                (teamColor == ChessGame.TeamColor.BLACK && newPosition.getRow() == 1) ){
             moves.add(new ChessMove(currentPosition, newPosition, ChessPiece.PieceType.QUEEN));
             moves.add(new ChessMove(currentPosition, newPosition, ChessPiece.PieceType.KNIGHT));
             moves.add(new ChessMove(currentPosition, newPosition, ChessPiece.PieceType.ROOK));

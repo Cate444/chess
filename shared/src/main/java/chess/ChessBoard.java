@@ -116,10 +116,5 @@ public class ChessBoard {
         return boardString.toString();
     }
 
-    public ChessBoard clone(){
-        return new ChessBoard(board);
-    }
-
-
 }
 

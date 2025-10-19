@@ -18,7 +18,9 @@ public class RookCalc extends  CalcMove{
             if(board.isAvailableAndWillKill(newPosition, teamColor)[0]){
                 addMove(newPosition, moves);
             }
-            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] || (!board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
+            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] ||
+                    (!board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                            !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
                 break;
             }
             newPosition = new ChessPosition(newPosition.getRow() + 1, newPosition.getColumn());
@@ -30,7 +32,9 @@ public class RookCalc extends  CalcMove{
             if(board.isAvailableAndWillKill(newPosition, teamColor)[0]){
                 addMove(newPosition, moves);
             }
-            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] || (!board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
+            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] ||
+                    (!board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                            !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
                 break;
             }
             newPosition = new ChessPosition(newPosition.getRow() - 1, newPosition.getColumn());
@@ -42,7 +46,9 @@ public class RookCalc extends  CalcMove{
             if(board.isAvailableAndWillKill(newPosition, teamColor)[0]){
                 addMove(newPosition, moves);
             }
-            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] || (!board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
+            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] ||
+                    (!board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                            !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
                 break;
             }
             newPosition = new ChessPosition(newPosition.getRow(), newPosition.getColumn()+1);
@@ -54,7 +60,9 @@ public class RookCalc extends  CalcMove{
             if(board.isAvailableAndWillKill(newPosition, teamColor)[0]){
                 addMove(newPosition, moves);
             }
-            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] || (!board.isAvailableAndWillKill(newPosition, teamColor)[0] && !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
+            if (board.isAvailableAndWillKill(newPosition, teamColor)[1] ||
+                    (!board.isAvailableAndWillKill(newPosition, teamColor)[0] &&
+                            !board.isAvailableAndWillKill(newPosition, teamColor)[1])){
                 break;
             }
             newPosition = new ChessPosition(newPosition.getRow(), newPosition.getColumn()-1);

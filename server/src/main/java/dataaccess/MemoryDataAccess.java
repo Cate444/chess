@@ -8,7 +8,6 @@ import java.util.*;
 public class MemoryDataAccess implements DataAccess{
     private final HashMap<String, UserData> users = new HashMap<>();
     private final HashMap<String, String> authTokenUserMap = new HashMap<>();
-
     public final ArrayList<GameData> gameList = new ArrayList<>();
     private int gameCount = 1;
 
