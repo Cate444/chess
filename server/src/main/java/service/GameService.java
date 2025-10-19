@@ -4,7 +4,9 @@ import dataaccess.DataAccess;
 import datamodel.GameData;
 import datamodel.GameName;
 import datamodel.JoinInfo;
+import datamodel.ReturnGameData;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class GameService {
@@ -27,6 +29,12 @@ public class GameService {
         String username = dataAccess.authenticate(authToken);
         dataAccess.join(joinInfo, username);
         return;
+    }
+
+    public ArrayList<ReturnGameData> listGames(String authToken) throws Exception{
+        dataAccess.authenticate(authToken);
+        ArrayList<ReturnGameData> games = dataAccess.listGames();
+        return games;
     }
 
     public void clear(){

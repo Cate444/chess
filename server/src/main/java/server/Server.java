@@ -2,10 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import dataaccess.MemoryDataAccess;
 import datamodel.*;
@@ -26,7 +23,7 @@ public class Server {
         gameService = new GameService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", this::clear); //clear
+        server.delete("db", this::clear);
         server.post("user", this::register);
         server.post("session", this ::login);
         server.delete("session", this::logout);
@@ -82,7 +79,6 @@ public class Server {
     private void logout(Context ctx){
         try {
             String authToken = ctx.header("Authorization");
-            System.out.println(authToken);
             userService.logout(authToken);
             ctx.result();
         }catch (Exception ex){
@@ -113,16 +109,26 @@ public class Server {
        }
     }
 
-    private void listGames(Context ctx){
-        var serializer = new Gson();
-        String reqJason = ctx.body();
-        var req = serializer.fromJson(reqJason, Map.class);
+    private void listGames(Context ctx) throws Exception {
+        try {
+            var serializer = new Gson();
+            String authToken = ctx.header("Authorization");
+            ArrayList<ReturnGameData> games = gameService.listGames(authToken);
+            var res = Map.of("games", games);
 
-        //call to server to list games
+            // Proper JSON output
+            String json = serializer.toJson(res);
+            System.out.println(json);
 
-        var res = Map.of("games", List.of());
-        ctx.result(serializer.toJson(res));
+            ctx.result(json);
+        } catch (Exception ex) {
+            if (Objects.equals(ex.getMessage(), "Unauthorized")) {
+                var msg = "{ \"message\": \"Error: unauthorized\" }";
+                ctx.status(401).result(msg);
+            }
+        }
     }
+
 
     private void join(Context ctx) {
        try {

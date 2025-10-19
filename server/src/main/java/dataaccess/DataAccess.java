@@ -2,7 +2,7 @@ package dataaccess;
 
 import datamodel.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public interface DataAccess {
 
@@ -13,6 +13,6 @@ public interface DataAccess {
     void logout(String AuthToken) throws Exception;
     String authenticate(String authToken) throws Exception;
     int createGame(GameName gameName);
-
     void join(JoinInfo joinInfo, String username) throws Exception;
+    ArrayList<ReturnGameData> listGames();
 }

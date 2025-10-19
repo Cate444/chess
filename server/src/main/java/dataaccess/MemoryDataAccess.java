@@ -1,25 +1,23 @@
 package dataaccess;
 
 import chess.ChessGame;
-import datamodel.GameData;
-import datamodel.GameName;
-import datamodel.JoinInfo;
-import datamodel.UserData;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import datamodel.*;
+
+import java.util.*;
 
 public class MemoryDataAccess implements DataAccess{
     private final HashMap<String, UserData> users = new HashMap<>();
     private final HashMap<String, String> authTokenUserMap = new HashMap<>();
 
-    public final HashSet<GameData> gameList = new HashSet<>();
+    public final ArrayList<GameData> gameList = new ArrayList<>();
     private int gameCount = 1;
 
     @Override
     public void clear() {
         users.clear();
         authTokenUserMap.clear();
+        gameList.clear();
+        gameCount = 1;
     }
 
     @Override
@@ -59,7 +57,7 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public int createGame(GameName gameName){
-        GameData game = new GameData(gameCount, null, null, gameName, new ChessGame());
+        GameData game = new GameData(gameCount, null, null, gameName.gameName(), new ChessGame());
         gameList.add(game);
         gameCount += 1;
         return game.gameID();
@@ -95,4 +93,12 @@ public class MemoryDataAccess implements DataAccess{
         throw new Exception("bad request");
     }
 
+    @Override
+    public ArrayList<ReturnGameData> listGames() {
+        ArrayList<ReturnGameData>  newGameList= new ArrayList<>();
+        for (GameData game: gameList){
+            newGameList.add(new ReturnGameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
+        }
+        return newGameList;
+    }
 }
