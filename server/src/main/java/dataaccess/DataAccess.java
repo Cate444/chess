@@ -8,4 +8,6 @@ public interface DataAccess {
     UserData getUser(String username);
     String createAuthToken(String username);
     void logout(String AuthToken) throws Exception;
+    Boolean authenticate(String authToken) throws Exception;
+    int createGame(GameName gameName);
 }

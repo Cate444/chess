@@ -6,22 +6,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import service.GameService;
 import service.UserService;
 
 public class Server {
 
     private final Javalin server;
     private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         var dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
+        gameService = new GameService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         server.delete("db", this::clear); //clear
@@ -35,6 +36,7 @@ public class Server {
 
     private void clear(Context ctx){
         userService.clear();
+        gameService.clear();
     }
 
     private void register(Context ctx){
@@ -90,17 +92,21 @@ public class Server {
         }
     }
 
-    private void createGame(Context ctx){
-        var serializer = new Gson();
-        String authToken = ctx.header("Authorization");
-        int gameID = userService.createGame(authToken);
-//        String reqJason = ctx.body();
-//        var req = serializer.fromJson(reqJason, Map.class);
-
-        //call to server to create a game
-
-        var res = Map.of("gameID", gameID);
-        ctx.result(serializer.toJson(res));
+    private void createGame(Context ctx) throws Exception{
+       try {
+           var serializer = new Gson();
+           String reqJason = ctx.body();
+           GameName gameName = serializer.fromJson(reqJason, GameName.class);
+           String authToken = ctx.header("Authorization");
+           int gameID = gameService.createGame(authToken, gameName);
+           var res = Map.of("gameID", gameID);
+           ctx.result(serializer.toJson(res));
+       } catch (Exception ex){
+           if (Objects.equals(ex.getMessage(), "Unauthorized")) {
+               var msg = String.format(" { \"message\": \"Error: unauthorized\" }", ex.getMessage());
+               ctx.status(401).result(msg);
+           }
+       }
     }
 
     private void listGames(Context ctx){
