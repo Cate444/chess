@@ -1,10 +1,11 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.MemoryGameDataAccess;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
-import dataaccess.MemoryDataAccess;
+import dataaccess.MemoryUserDataAccess;
 import datamodel.*;
 import service.GameService;
 import service.UserService;
@@ -19,9 +20,10 @@ public class Server {
     private final Gson gson = new Gson();
 
     public Server() {
-        var dataAccess = new MemoryDataAccess();
-        this.userService = new UserService(dataAccess);
-        this.gameService = new GameService(dataAccess);
+        var userDataAccess = new MemoryUserDataAccess();
+        var gameDataAccess = new MemoryGameDataAccess();
+        this.userService = new UserService(userDataAccess);
+        this.gameService = new GameService(gameDataAccess, userDataAccess);
         this.server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Route mappings

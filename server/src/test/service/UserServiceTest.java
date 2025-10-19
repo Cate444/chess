@@ -1,8 +1,7 @@
 package service;
 
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
-import datamodel.GameName;
+import dataaccess.UserDataAccess;
+import dataaccess.MemoryUserDataAccess;
 import datamodel.UserData;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +16,7 @@ class UserServiceTest {
 
     @Test
     void register() throws Exception {
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         var authData = service.register(user);
@@ -28,7 +27,7 @@ class UserServiceTest {
 
     @Test
     void registerInvalidUsername() throws Exception{
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserService service = new UserService(db);
 
         var userWithNoName = new UserData(null, "j@j.com", "passThisWord");
@@ -55,7 +54,7 @@ class UserServiceTest {
 
     @Test
     void login() throws Exception {
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         service.register(user);
@@ -66,7 +65,7 @@ class UserServiceTest {
 
     @Test
     void loginInvalidUser() throws Exception {
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserService service = new UserService(db);
         var userDoesntExist = new UserData("joe", "j@j.com", "passThisWord");
         Exception exception = assertThrows(Exception.class, () -> service.login(userDoesntExist));
@@ -81,7 +80,7 @@ class UserServiceTest {
 
     @Test
     void logout() throws Exception{
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         service.register(user);
@@ -91,7 +90,7 @@ class UserServiceTest {
 
     @Test
     void logoutTwice() throws Exception{
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         service.register(user);

@@ -9,7 +9,7 @@ class DataAccessTest {
 
     @Test
     void clear() {
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         db.createUser(new UserData("joe", "j@j.com", "passThisWord"));
         db.clear();
         assertNull(db.getUser("joe"));
@@ -17,7 +17,7 @@ class DataAccessTest {
 
     @Test
     void createUser() {
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         var user = new UserData("joe", "j@j.com", "passThisWord");
         db.createUser(user);
         assertEquals(user, db.getUser(user.username()));
@@ -33,7 +33,7 @@ class DataAccessTest {
 
     @Test
     void logout() throws Exception{
-        DataAccess db = new MemoryDataAccess();
+        UserDataAccess db = new MemoryUserDataAccess();
         UserData user = new UserData("joe", "j@j.com", "passThisWord");
         db.createUser(user);
         String authToken = db.createAuthToken(user.username());

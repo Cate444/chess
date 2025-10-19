@@ -1,14 +1,13 @@
 package service;
 
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
+import dataaccess.UserDataAccess;
 import datamodel.AuthData;
 import datamodel.UserData;
 
 public class UserService {
-    private final DataAccess dataAccess;
+    private final UserDataAccess dataAccess;
 
-    public UserService(DataAccess dataAccess){
+    public UserService(UserDataAccess dataAccess){
         this.dataAccess = dataAccess;
     }
 

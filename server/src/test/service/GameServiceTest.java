@@ -1,8 +1,10 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.GameDataAccess;
+import dataaccess.MemoryGameDataAccess;
+import dataaccess.UserDataAccess;
+import dataaccess.MemoryUserDataAccess;
 import datamodel.GameName;
 import datamodel.JoinInfo;
 import datamodel.ReturnGameData;
@@ -17,9 +19,10 @@ class GameServiceTest {
 
     @Test
     void joinGame() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
+        UserDataAccess userDB = new MemoryUserDataAccess();
+        GameDataAccess gameDB = new MemoryGameDataAccess();
+        UserService userService = new UserService(userDB);
+        GameService gameService = new GameService(gameDB, userDB);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         userService.register(user);
         var authData = userService.login(user);
@@ -35,9 +38,10 @@ class GameServiceTest {
 
     @Test
     void joinGameBad() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
+        UserDataAccess userDB = new MemoryUserDataAccess();
+        GameDataAccess gameDB = new MemoryGameDataAccess();
+        UserService userService = new UserService(userDB);
+        GameService gameService = new GameService(gameDB, userDB);
         var user = new UserData("joe", "j@j.com", "passThisWord");
         userService.register(user);
         var authData = userService.login(user);
@@ -48,9 +52,10 @@ class GameServiceTest {
 
     @Test
     void createGame() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
+        UserDataAccess userDB = new MemoryUserDataAccess();
+        GameDataAccess gameDB = new MemoryGameDataAccess();
+        UserService userService = new UserService(userDB);
+        GameService gameService = new GameService(gameDB, userDB);
         var user = new UserData("Eva", "Eva@faith.com", "theBabes");
         userService.register(user);
         var authData = userService.login(user);
@@ -60,9 +65,10 @@ class GameServiceTest {
 
     @Test
     void badDataCreateGame() throws Exception{
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
+        UserDataAccess userDB = new MemoryUserDataAccess();
+        GameDataAccess gameDB = new MemoryGameDataAccess();
+        UserService userService = new UserService(userDB);
+        GameService gameService = new GameService(gameDB, userDB);
         UserData user = new UserData("Eva", "Eva@faith.com", "theBabes");
         userService.register(user);
         var authData = userService.login(user);
@@ -72,9 +78,10 @@ class GameServiceTest {
 
     @Test
     void listGames() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
+        UserDataAccess userDB = new MemoryUserDataAccess();
+        GameDataAccess gameDB = new MemoryGameDataAccess();
+        UserService userService = new UserService(userDB);
+        GameService gameService = new GameService(gameDB, userDB);
         var user = new UserData("Eva", "Eva@faith.com", "theBabes");
         userService.register(user);
         var authData = userService.login(user);
@@ -86,9 +93,10 @@ class GameServiceTest {
 
     @Test
     void unAuthorizedListGames() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        UserService userService = new UserService(db);
-        GameService gameService = new GameService(db);
+        UserDataAccess userDB = new MemoryUserDataAccess();
+        GameDataAccess gameDB = new MemoryGameDataAccess();
+        UserService userService = new UserService(userDB);
+        GameService gameService = new GameService(gameDB, userDB);
         var user = new UserData("Eva", "Eva@faith.com", "theBabes");
         userService.register(user);
         var authData = userService.login(user);
