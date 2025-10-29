@@ -37,8 +37,12 @@ public class GameService {
         return games;
     }
 
-    public void clear(){
-        gameDataAccess.clear();
+    public void clear() throws Exception {
+        try {
+            gameDataAccess.clear();
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
 }

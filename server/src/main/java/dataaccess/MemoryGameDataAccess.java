@@ -5,6 +5,7 @@ import datamodel.GameData;
 import datamodel.GameName;
 import datamodel.JoinInfo;
 import datamodel.ReturnGameData;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
 
@@ -12,9 +13,10 @@ public class MemoryGameDataAccess implements GameDataAccess {
     public final ArrayList<GameData> gameList = new ArrayList<>();
     private int gameCount = 1;
 
-    public void clear() {
+    public Executable clear() {
         gameList.clear();
         gameCount = 1;
+        return null;
     }
 
     @Override

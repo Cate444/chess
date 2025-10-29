@@ -1,6 +1,7 @@
 package dataaccess;
 
 import datamodel.*;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.*;
 
@@ -9,9 +10,10 @@ public class MemoryUserDataAccess implements UserDataAccess {
     private final HashMap<String, String> authTokenUserMap = new HashMap<>();
 
     @Override
-    public void clear() {
+    public Executable clear() {
         users.clear();
         authTokenUserMap.clear();
+        return null;
     }
 
     @Override

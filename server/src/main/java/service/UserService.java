@@ -43,8 +43,12 @@ public class UserService {
         }
     }
 
-    public void clear(){
-        dataAccess.clear();
+    public void clear() throws Exception {
+        try {
+            dataAccess.clear();
+        } catch (Exception ex){
+            throw ex;
+        }
     }
 }
 

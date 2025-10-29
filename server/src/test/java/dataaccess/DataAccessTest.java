@@ -2,17 +2,36 @@ package dataaccess;
 
 import datamodel.UserData;
 import org.junit.jupiter.api.Test;
+import server.Server;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataAccessTest {
 
+
     @Test
-    void clear() {
+    void clear() throws Exception{
         UserDataAccess db = new MemoryUserDataAccess();
         db.createUser(new UserData("joe", "j@j.com", "passThisWord"));
         db.clear();
         assertNull(db.getUser("joe"));
+    }
+
+    @Test
+    void clearWrong() throws Exception{
+        UserDataAccess userDataAccess;
+        GameDataAccess gameDataAccess;
+        try {
+            DatabaseManager.createDatabase();
+            userDataAccess = new SQLUserDataAccess();
+            gameDataAccess = new SQLGameDataAccess();
+        }catch (Exception ex){
+            userDataAccess = new MemoryUserDataAccess();
+            gameDataAccess = new MemoryGameDataAccess();
+        }
+        assertDoesNotThrow(userDataAccess.clear());
+        assertDoesNotThrow(gameDataAccess.clear());
+
     }
 
     @Test

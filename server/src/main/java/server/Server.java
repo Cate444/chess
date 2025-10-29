@@ -27,7 +27,6 @@ public class Server {
             DatabaseManager.createDatabase();
             userDataAccess = new SQLUserDataAccess();
             gameDataAccess = new SQLGameDataAccess();
-
         }catch (Exception ex){
             userDataAccess = new MemoryUserDataAccess();
             gameDataAccess = new MemoryGameDataAccess();
@@ -79,9 +78,14 @@ public class Server {
 
 
     private void clear(Context ctx) {
-        userService.clear();
-        gameService.clear();
-        ctx.status(200);
+        try {
+            userService.clear();
+            gameService.clear();
+            ctx.status(200);
+        } catch (Exception ex){
+            System.out.println(ex.getMessage());
+            sendError(ctx, 500, ex.getMessage());
+        }
     }
 
     private void register(Context ctx) {

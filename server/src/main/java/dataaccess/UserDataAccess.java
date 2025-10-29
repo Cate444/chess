@@ -1,9 +1,10 @@
 package dataaccess;
 
 import datamodel.*;
+import org.junit.jupiter.api.function.Executable;
 
 public interface UserDataAccess {
-    void clear();
+    Executable clear() throws Exception;
     void createUser(UserData userData);
     UserData getUser(String username);
     String createAuthToken(String username);

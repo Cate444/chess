@@ -3,6 +3,7 @@ package dataaccess;
 import datamodel.GameName;
 import datamodel.JoinInfo;
 import datamodel.ReturnGameData;
+import org.junit.jupiter.api.function.Executable;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,7 +25,7 @@ public class SQLGameDataAccess implements GameDataAccess {
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  gamesTable (
+            CREATE TABLE IF NOT EXISTS  gameTable (
               `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256) NOT NULL,
               `blackUsername` varchar(256) NOT NULL,
@@ -35,8 +36,16 @@ public class SQLGameDataAccess implements GameDataAccess {
     };
 
     @Override
-    public void clear() {
-
+    public Executable clear()throws Exception{
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String deleteAllGames = "DELETE FROM gameTable";
+            try (var preparedStatement = conn.prepareStatement(deleteAllGames)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (DataAccessException | SQLException e) {
+            throw new Exception(e.getMessage());
+        }
+        return null;
     }
 
     @Override
