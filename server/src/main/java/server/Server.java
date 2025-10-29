@@ -1,15 +1,16 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.MemoryGameDataAccess;
+import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
-import dataaccess.MemoryUserDataAccess;
 import datamodel.*;
 import service.GameService;
 import service.UserService;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 public class Server {
@@ -20,11 +21,22 @@ public class Server {
     private final Gson gson = new Gson();
 
     public Server() {
-        var userDataAccess = new MemoryUserDataAccess();
-        var gameDataAccess = new MemoryGameDataAccess();
+        UserDataAccess userDataAccess;
+        GameDataAccess gameDataAccess;
+        try {
+            DatabaseManager.createDatabase();
+            userDataAccess = new SQLUserDataAccess();
+            gameDataAccess = new SQLGameDataAccess();
+
+        }catch (Exception ex){
+            userDataAccess = new MemoryUserDataAccess();
+            gameDataAccess = new MemoryGameDataAccess();
+        }
+
         this.userService = new UserService(userDataAccess);
         this.gameService = new GameService(gameDataAccess, userDataAccess);
         this.server = Javalin.create(config -> config.staticFiles.add("web"));
+
 
         // Route mappings
         server.delete("db", this::clear);
@@ -35,6 +47,22 @@ public class Server {
         server.post("game", this::createGame);
         server.put("game", this::join);
     }
+
+
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  pet (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `name` varchar(256) NOT NULL,
+              `type` ENUM('KING', 'QUEEN', 'KNIGHT', 'ROOK', 'BISHOP', 'PAWN') DEFAULT 'PAWN',
+              `json` TEXT DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              INDEX(type),
+              INDEX(name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
+
 
     private <T> T readJson(Context ctx, Class<T> clazz) {
         return gson.fromJson(ctx.body(), clazz);

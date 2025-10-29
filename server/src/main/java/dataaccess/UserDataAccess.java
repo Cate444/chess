@@ -2,8 +2,6 @@ package dataaccess;
 
 import datamodel.*;
 
-import java.util.ArrayList;
-
 public interface UserDataAccess {
     void clear();
     void createUser(UserData userData);
