@@ -2,6 +2,7 @@ package dataaccess;
 
 import datamodel.UserData;
 import org.junit.jupiter.api.function.Executable;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -54,17 +55,35 @@ public class SQLUserDataAccess implements UserDataAccess{
                 preparedStatement.executeUpdate();
             }
         } catch (Exception ex) {
-            System.out.println("HELLO HELLO");
             throw new Exception("Couldn't clear users");
         }
         return null;
     }
 
     @Override
-    public void createUser(UserData userData) {}
+    public void createUser(UserData userData) throws Exception {
+        if (userData.username() == null || userData.email() == null || userData.password() == null) {
+            throw new DataAccessException("bad request");
+        }
+        String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String insertUser = "INSERT INTO usersTable(username, email, password) " +
+                    "VALUES(?, ?, ?)";
+            try (var preparedStatement = conn.prepareStatement(insertUser)) {
+                preparedStatement.setString(1, userData.username());
+                preparedStatement.setString(2, userData.email());
+                preparedStatement.setString(3, hashedPassword);
+                preparedStatement.executeUpdate();
+            }
+        } catch (Exception ex){
+            throw new Exception("Already exists");
+        }
+    }
     @Override
     public UserData getUser(String username){
-        return new UserData("username", "email", "password");
+        //return null;
+        return new UserData(null, null, null);
     }
     @Override
     public String createAuthToken(String username){
