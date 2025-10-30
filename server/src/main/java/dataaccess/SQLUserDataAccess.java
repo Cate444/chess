@@ -67,6 +67,14 @@ public class SQLUserDataAccess implements UserDataAccess{
     public void createUser(UserData userData) throws Exception {
         String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
         try (Connection conn = DatabaseManager.getConnection()) {
+            String lookUpUser = "SELECT username FROM usersTable WHERE username = ?";
+            try (var preparedStatement = conn.prepareStatement(lookUpUser)) {
+                preparedStatement.setString(1, userData.username());
+                ResultSet rs = preparedStatement.executeQuery();
+                if (rs.next()) {
+                    throw new Exception("Already exists");
+                }
+            }
             String insertUser = "INSERT INTO usersTable(username, email, password) " +
                     "VALUES(?, ?, ?)";
             try (var preparedStatement = conn.prepareStatement(insertUser)) {
@@ -76,7 +84,7 @@ public class SQLUserDataAccess implements UserDataAccess{
                 preparedStatement.executeUpdate();
             }
         } catch (Exception ex){
-            throw new Exception("Already exists");
+            throw ex;
         }
     }
 
@@ -84,7 +92,6 @@ public class SQLUserDataAccess implements UserDataAccess{
     public String createAuthToken(UserData userData) throws Exception{
         String authToken = UUID.randomUUID().toString();
         try (Connection conn = DatabaseManager.getConnection()){
-            // look up user and then compare passwords
 
             String lookUpUser = "SELECT * FROM usersTable WHERE username = ?";
 
