@@ -75,11 +75,65 @@ public class SQLGameDataAccess implements GameDataAccess {
         } catch (Exception ex) {
             throw ex;
         }
-        //return 0;
     }
 
     @Override
-    public void join(JoinInfo joinInfo, String username) throws Exception {
+    public void join(JoinInfo joinInfo, String authToken) throws Exception {
+        if(joinInfo.playerColor() == null){
+            throw new Exception("bad request");
+        }
+       try(Connection conn = DatabaseManager.getConnection()){
+           String getUser = "SELECT username FROM authTable WHERE authToken = ?";
+           try (var preparedStatementUE = conn.prepareStatement(getUser)) {
+               preparedStatementUE.setString(1, authToken);
+               ResultSet rs = preparedStatementUE.executeQuery();
+               if (!rs.next()) {
+                   throw new Exception("bad request");
+               }
+               String username = rs.getString("username");
+
+               String checkGameExists = "SELECT * FROM gameTable WHERE gameID = ?";
+               try (var preparedStatementGE = conn.prepareStatement(checkGameExists)) {
+                   preparedStatementGE.setInt(1, joinInfo.gameID());
+                   rs = preparedStatementGE.executeQuery();
+                   if (!rs.next()) {
+                       throw new Exception("bad request");
+                   }
+               }
+
+               String checkAvailability = "SELECT whiteUsername, blackUsername FROM gameTable WHERE gameID = ?";
+               try (var preparedStatementAvailability = conn.prepareStatement(checkAvailability)) {
+                   preparedStatementAvailability.setInt(1, joinInfo.gameID());
+                   rs = preparedStatementAvailability.executeQuery();
+                   if (!rs.next()) {
+                       throw new DataAccessException("Bad Request");
+                   }
+                   if (rs.getString("whiteUsername") != null && joinInfo.playerColor() == ChessGame.TeamColor.WHITE) {
+                       throw new DataAccessException("Already Taken");
+                   }
+                   if (rs.getString("blackUsername") != null && joinInfo.playerColor() == ChessGame.TeamColor.BLACK) {
+                       throw new DataAccessException("already taken");
+                   }
+               }
+               if (joinInfo.playerColor() == ChessGame.TeamColor.WHITE) {
+                   String updateGame = "UPDATE gameTable SET whiteUsername = ? WHERE gameID = ?";
+                   try (var preparedStatementWhitePlayer = conn.prepareStatement(updateGame)) {
+                       preparedStatementWhitePlayer.setString(1, username);
+                       preparedStatementWhitePlayer.setInt(2, joinInfo.gameID());
+                       preparedStatementWhitePlayer.executeUpdate();
+                   }
+               } else if (joinInfo.playerColor() == ChessGame.TeamColor.BLACK) {
+                   String updateGame = "UPDATE gameTable SET blackUsername = ? WHERE gameID = ?";
+                   try (var preparedStatementWhitePlayer = conn.prepareStatement(updateGame)) {
+                       preparedStatementWhitePlayer.setString(1, username);
+                       preparedStatementWhitePlayer.setInt(2, joinInfo.gameID());
+                       preparedStatementWhitePlayer.executeUpdate();
+                   }
+               }
+           }
+       } catch (Exception ex){
+           throw ex;
+       }
 
     }
 

@@ -27,8 +27,8 @@ public class GameService {
     }
 
     public void joinGame(String authToken, JoinInfo joinInfo) throws Exception{
-        String username = userDataAccess.authenticate(authToken);
-        gameDataAccess.join(joinInfo, username);
+        String theAuthToken = userDataAccess.authenticate(authToken);
+        gameDataAccess.join(joinInfo, theAuthToken);
     }
 
     public ArrayList<ReturnGameData> listGames(String authToken) throws Exception{
