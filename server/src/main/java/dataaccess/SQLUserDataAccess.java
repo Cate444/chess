@@ -5,6 +5,8 @@ import org.junit.jupiter.api.function.Executable;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SQLUserDataAccess implements UserDataAccess{
@@ -80,13 +82,12 @@ public class SQLUserDataAccess implements UserDataAccess{
             throw new Exception("Already exists");
         }
     }
-    @Override
-    public UserData getUser(String username){
-        //return null;
-        return new UserData(null, null, null);
-    }
+
     @Override
     public String createAuthToken(String username){
+        try {
+
+        }
         return "authtoken";
     }
     @Override

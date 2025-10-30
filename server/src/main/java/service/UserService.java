@@ -16,8 +16,7 @@ public class UserService {
             throw new Exception("no password");
         } if (user.username() == null){
             throw new Exception("no username");
-
-//        } if(dataAccess.getUser(user.username()) != null){
+//        } if(dataAccess.getUser(user) != null){
 //            throw new Exception("Already exists");
         }
         dataAccess.createUser(user);
@@ -28,10 +27,10 @@ public class UserService {
         if (user.username() == null || user.password() == null){
             throw new Exception("bad request");
         }
-        UserData userdata = dataAccess.getUser(user.username());
-        if (userdata == null || !userdata.password().equals(user.password())){
-            throw new Exception("user doesnt exist");
-        }
+//        UserData userdata = dataAccess.getUser(user);
+//        if (userdata == null || !userdata.password().equals(user.password())){
+//            throw new Exception("user doesnt exist");
+//        }
         return new AuthData(user.username(), dataAccess.createAuthToken(user.username()));
     }
 

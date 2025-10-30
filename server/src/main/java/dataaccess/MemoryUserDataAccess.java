@@ -18,13 +18,14 @@ public class MemoryUserDataAccess implements UserDataAccess {
 
     @Override
     public void createUser(UserData user) {
-        users.put(user.username(), user);
+        if (users.containsValue(user.username())){
+            users.put(user.username(), user);
+        }
     }
 
-    @Override
-    public UserData getUser(String username) {
-        return users.get(username);
-    }
+//    public UserData getUser(UserData userData) {
+//        return users.get(userData.username());
+//    }
 
 
     @Override
