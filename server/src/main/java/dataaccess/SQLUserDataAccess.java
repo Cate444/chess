@@ -136,6 +136,19 @@ public class SQLUserDataAccess implements UserDataAccess{
 
     }
     @Override
-    public String authenticate(String authToken) throws Exception{return "";}
-
+    public String authenticate(String authToken) throws Exception{
+        try (Connection conn = DatabaseManager.getConnection()){
+            String selectAuth = "SELECT * FROM authTable WHERE authToken = ?";
+            try (var preparedStatement = conn.prepareStatement(selectAuth)) {
+                preparedStatement.setString(1, authToken);
+                ResultSet rs = preparedStatement.executeQuery();
+                if (!rs.next()) {
+                    throw new Exception("unauthorized");
+                }
+            }
+        }catch (Exception ex){
+            throw ex;
+        }
+        return authToken;
+    }
 }

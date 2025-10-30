@@ -25,11 +25,6 @@ public class UserService {
         if (user.username() == null || user.password() == null){
             throw new Exception("bad request");
         }
-
-//        UserData userdata = dataAccess.getUser(user);
-//        if (userdata == null || !userdata.password().equals(user.password())){
-//            throw new Exception("user doesnt exist");
-//        }
         return new AuthData(user.username(), dataAccess.createAuthToken(user));
     }
 

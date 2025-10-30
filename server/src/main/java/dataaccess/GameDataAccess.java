@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public interface GameDataAccess {
     Executable clear() throws Exception;
-    int createGame(GameName gameName);
+    int createGame(GameName gameName) throws Exception;
     void join(JoinInfo joinInfo, String username) throws Exception;
-    ArrayList<ReturnGameData> listGames();
+    ArrayList<ReturnGameData> listGames() throws Exception;
 }
