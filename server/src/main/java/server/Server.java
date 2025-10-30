@@ -140,7 +140,7 @@ public class Server {
             writeJson(ctx, Map.of("gameID", gameID));
         } catch (Exception ex) {
             switch (ex.getMessage()) {
-                case "Unauthorized" -> sendError(ctx, 401, "unauthorized");
+                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
                 case "bad request" -> sendError(ctx, 400, "bad request");
                 default -> sendError(ctx, 500, "internal server error");
             }
