@@ -169,7 +169,7 @@ public class Server {
             ctx.status(200);
         } catch (Exception ex) {
             switch (ex.getMessage()) {
-                case "Unauthorized" -> sendError(ctx, 401, "unauthorized");
+                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
                 case "bad request" -> sendError(ctx, 400, "bad request");
                 case "already taken" -> sendError(ctx, 403, "already taken");
                 default -> sendError(ctx, 500, "internal server error");

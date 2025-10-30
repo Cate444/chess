@@ -139,6 +139,17 @@ public class SQLGameDataAccess implements GameDataAccess {
 
     @Override
     public ArrayList<ReturnGameData> listGames() throws Exception {
-        return null;
+        ArrayList<ReturnGameData> returnList = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String getGames = "SELECT gameID, whiteUsername, blackUsername, gameName FROM gameTable";
+            try (var preparedStatement = conn.prepareStatement(getGames)) {
+                ResultSet rs = preparedStatement.executeQuery();
+                if (!rs.next()) {
+                    return returnList;
+                }
+                //return rs.getInt("gameID");
+            }
+        }
+        return returnList;
     }
 }
