@@ -32,9 +32,13 @@ public class GameService {
     }
 
     public ArrayList<ReturnGameData> listGames(String authToken) throws Exception{
+        try{
         userDataAccess.authenticate(authToken);
         ArrayList<ReturnGameData> games = gameDataAccess.listGames();
         return games;
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     public void clear() throws Exception {

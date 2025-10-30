@@ -133,8 +133,8 @@ public class SQLUserDataAccess implements UserDataAccess{
         }catch (Exception ex){
             throw ex;
         }
-
     }
+
     @Override
     public String authenticate(String authToken) throws Exception{
         try (Connection conn = DatabaseManager.getConnection()){

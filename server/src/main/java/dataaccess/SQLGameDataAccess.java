@@ -144,9 +144,6 @@ public class SQLGameDataAccess implements GameDataAccess {
             String getGames = "SELECT gameID, whiteUsername, blackUsername, gameName FROM gameTable";
             try (var preparedStatement = conn.prepareStatement(getGames)) {
                 ResultSet rs = preparedStatement.executeQuery();
-//                if (!rs.next()) {
-//                    return returnList;
-//                }
                 while(rs.next()){
                     int gameID = rs.getInt("gameID");
                     String gameName = rs.getString("gameName");
@@ -166,12 +163,6 @@ public class SQLGameDataAccess implements GameDataAccess {
 
                     returnList.add(new ReturnGameData(gameID,whiteUsername, blackUsername,gameName));
                 }
-//                String gameName = rs.getString("gameName");
-//                System.out.println(gameName);
-//                gameName = rs.getString("gameName");
-//                System.out.println(gameName);
-                //returnList.add(new ReturnGameData(rs))
-                //return rs.getInt("gameID");
             }
         } catch (Exception ex) {
             throw ex;

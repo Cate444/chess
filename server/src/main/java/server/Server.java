@@ -153,7 +153,7 @@ public class Server {
             ArrayList<ReturnGameData> games = gameService.listGames(authToken);
             writeJson(ctx, Map.of("games", games));
         } catch (Exception ex) {
-            if ("Unauthorized".equals(ex.getMessage())) {
+            if ("unauthorized".equals(ex.getMessage())) {
                 sendError(ctx, 401, "unauthorized");
             } else {
                 sendError(ctx, 500, "internal server error");
