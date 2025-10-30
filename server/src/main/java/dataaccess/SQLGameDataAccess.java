@@ -144,11 +144,37 @@ public class SQLGameDataAccess implements GameDataAccess {
             String getGames = "SELECT gameID, whiteUsername, blackUsername, gameName FROM gameTable";
             try (var preparedStatement = conn.prepareStatement(getGames)) {
                 ResultSet rs = preparedStatement.executeQuery();
-                if (!rs.next()) {
-                    return returnList;
+//                if (!rs.next()) {
+//                    return returnList;
+//                }
+                while(rs.next()){
+                    int gameID = rs.getInt("gameID");
+                    String gameName = rs.getString("gameName");
+                    String whiteUsername;
+                    String blackUsername;
+
+                    if (rs.getString("whiteUsername") != null){
+                        whiteUsername = rs.getString("whiteUsername");
+                    } else {
+                        whiteUsername = null;
+                    }
+                    if (rs.getString("blackUsername") != null){
+                        blackUsername = rs.getString("blackUsername");
+                    } else {
+                        blackUsername = null;
+                    }
+
+                    returnList.add(new ReturnGameData(gameID,whiteUsername, blackUsername,gameName));
                 }
+//                String gameName = rs.getString("gameName");
+//                System.out.println(gameName);
+//                gameName = rs.getString("gameName");
+//                System.out.println(gameName);
+                //returnList.add(new ReturnGameData(rs))
                 //return rs.getInt("gameID");
             }
+        } catch (Exception ex) {
+            throw ex;
         }
         return returnList;
     }
