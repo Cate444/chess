@@ -29,9 +29,9 @@ public class MemoryUserDataAccess implements UserDataAccess {
 
 
     @Override
-    public String createAuthToken(String username){
+    public String createAuthToken(UserData userData){
         String authToken = UUID.randomUUID().toString();
-        authTokenUserMap.put(authToken, username);
+        authTokenUserMap.put(authToken, userData.username());
         return authToken;
     }
 

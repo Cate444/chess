@@ -110,6 +110,7 @@ public class Server {
         } catch (Exception ex) {
             switch (ex.getMessage()) {
                 case "user doesnt exist" -> sendError(ctx, 401, "unauthorized");
+                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
                 case "bad request" -> sendError(ctx, 400, "bad request");
                 default -> sendError(ctx, 500, "internal server error");
             }
@@ -122,10 +123,11 @@ public class Server {
             userService.logout(authToken);
             ctx.status(200);
         } catch (Exception ex) {
-            if ("Unauthorized".equals(ex.getMessage())) {
-                sendError(ctx, 401, "unauthorized");
-            } else {
-                sendError(ctx, 500, "internal server error");
+            switch (ex.getMessage()) {
+                case "user doesnt exist" -> sendError(ctx, 401, "unauthorized");
+                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
+                case "bad request" -> sendError(ctx, 400, "bad request");
+                default -> sendError(ctx, 500, "internal server error");
             }
         }
     }

@@ -56,7 +56,7 @@ class DataAccessTest {
         UserDataAccess db = new MemoryUserDataAccess();
         UserData user = new UserData("joe", "j@j.com", "passThisWord");
         db.createUser(user);
-        String authToken = db.createAuthToken(user.username());
+        String authToken = db.createAuthToken(user);
         assertDoesNotThrow(() -> db.logout(authToken));
     }
 }
