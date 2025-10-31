@@ -260,4 +260,53 @@ class DataAccessTest {
         Exception exception = assertThrows(Exception.class, gameDataAccess::listGames);
     }
 
+    @Test
+    void joinBad() throws Exception{
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        gameDataAccess.createGame(new GameName("AGame"));
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT gameID FROM gameTable WHERE gameName = ?");
+            stmt.setString(1, "AGame");
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            int gameID = rs.getInt("gameID");
+            assertThrows(Exception.class, ()-> gameDataAccess.join(new JoinInfo(ChessGame.TeamColor.WHITE, gameID), "Ty"));
+        }
+    }
+
+    @Test
+    void join() throws Exception {
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        String authToken = userDataAccess.createAuthToken(user);
+        gameDataAccess.createGame(new GameName("AGame"));
+
+        int gameID;
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT gameID FROM gameTable WHERE gameName = ?");
+            stmt.setString(1, "AGame");
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            gameID = rs.getInt("gameID");
+            gameDataAccess.join(new JoinInfo(ChessGame.TeamColor.WHITE, gameID), authToken);
+            var checkStmt = conn.prepareStatement("SELECT whiteUsername FROM gameTable WHERE gameID = ?");
+            checkStmt.setInt(1, gameID);
+            ResultSet checkRs = checkStmt.executeQuery();
+            checkRs.next();
+            assertEquals("Ty", checkRs.getString("whiteUsername"));
+        }
+    }
 }
