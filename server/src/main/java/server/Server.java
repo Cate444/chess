@@ -93,7 +93,7 @@ public class Server {
             writeJson(ctx, authData);
         } catch (Exception ex) {
             switch (ex.getMessage()) {
-                case "Already exists" -> sendError(ctx, 403, "already taken");
+                case "Already exists" -> sendError(ctx, 403, "This user already exist. Try logging in");
                 case "no password", "no username" -> sendError(ctx, 400, "bad request");
                 default -> sendError(ctx, 500, "internal server error");
             }
@@ -166,7 +166,7 @@ public class Server {
             switch (ex.getMessage()) {
                 case "unauthorized" -> sendError(ctx, 401, "unauthorized");
                 case "bad request" -> sendError(ctx, 400, "bad request");
-                case "already taken" -> sendError(ctx, 403, "already taken");
+                case "already taken" -> sendError(ctx, 403, "team already has player");
                 default -> sendError(ctx, 500, "internal server error");
             }
         }
