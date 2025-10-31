@@ -5,7 +5,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -42,7 +41,6 @@ public class SQLUserDataAccess implements UserDataAccess{
             """
     };
 
-    //
     @Override
     public Executable clear() throws Exception{
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -64,7 +62,6 @@ public class SQLUserDataAccess implements UserDataAccess{
         return null;
     }
 
-    //
     @Override
     public void createUser(UserData userData) throws Exception {
         String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
@@ -90,7 +87,6 @@ public class SQLUserDataAccess implements UserDataAccess{
         }
     }
 
-    //
     @Override
     public String createAuthToken(UserData userData) throws Exception{
         String authToken = UUID.randomUUID().toString();
@@ -123,7 +119,6 @@ public class SQLUserDataAccess implements UserDataAccess{
         }
     }
 
-    //
     @Override
     public void logout(String authToken) throws Exception{
         try (Connection conn = DatabaseManager.getConnection()){

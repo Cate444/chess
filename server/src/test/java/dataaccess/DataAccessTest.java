@@ -205,4 +205,34 @@ class DataAccessTest {
         String authTokenReturned = userDataAccess.authenticate(wrongAthToken);
         assertNotEquals(authToken, authTokenReturned);
     }
+
+    @Test
+    void createGame() throws Exception{
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        gameDataAccess.createGame(new GameName("AGame"));
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT gameName, gameID FROM gameTable WHERE gameName = ?");
+            stmt.setString(1, "AGame");
+            ResultSet rs = stmt.executeQuery();
+            assertTrue(rs.next());
+            assertEquals(rs.getString("gameName"), "AGame");
+        }
+    }
+
+    @Test
+    void createGame_throwsException_whenGameNameIsNull() throws Exception {
+        SQLGameDataAccess gameDataAccess = new SQLGameDataAccess();
+        Exception exception = assertThrows(Exception.class, () -> {
+            gameDataAccess.createGame(new GameName(null));
+        });
+    }
+
+
 }
