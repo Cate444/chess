@@ -107,7 +107,6 @@ public class Server {
             writeJson(ctx, authData);
         } catch (Exception ex) {
             switch (ex.getMessage()) {
-                case "user doesnt exist" -> sendError(ctx, 401, "unauthorized");
                 case "unauthorized" -> sendError(ctx, 401, "unauthorized");
                 case "bad request" -> sendError(ctx, 400, "bad request");
                 default -> sendError(ctx, 500, "internal server error");
@@ -122,9 +121,7 @@ public class Server {
             ctx.status(200);
         } catch (Exception ex) {
             switch (ex.getMessage()) {
-                case "user doesnt exist" -> sendError(ctx, 401, "unauthorized");
                 case "unauthorized" -> sendError(ctx, 401, "unauthorized");
-                case "bad request" -> sendError(ctx, 400, "bad request");
                 default -> sendError(ctx, 500, "internal server error");
             }
         }

@@ -16,17 +16,17 @@ public class SQLGameDataAccess implements GameDataAccess {
 
     public SQLGameDataAccess() throws Exception{
         try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
+            for (String statement : createGameTable) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }
             }
         } catch (SQLException ex) {
-            throw new Exception(String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new Exception(String.format("Unable to configure user database: %s", ex.getMessage()));
         }
     }
 
-    private final String[] createStatements = {
+    private final String[] createGameTable = {
             """
             CREATE TABLE IF NOT EXISTS  gameTable (
               `gameID` int NOT NULL AUTO_INCREMENT,

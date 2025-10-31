@@ -13,17 +13,17 @@ public class SQLUserDataAccess implements UserDataAccess{
 
     public SQLUserDataAccess() throws Exception{
             try (Connection conn = DatabaseManager.getConnection()) {
-                for (String statement : createStatements) {
+                for (String statement : createUserAndAuthTables) {
                     try (var preparedStatement = conn.prepareStatement(statement)) {
                         preparedStatement.executeUpdate();
                     }
                 }
             } catch (SQLException ex) {
-                throw new Exception(String.format("Unable to configure database: %s", ex.getMessage()));
+                throw new Exception(String.format("Unable to configure game database: %s", ex.getMessage()));
             }
         }
 
-    private final String[] createStatements = {
+    private final String[] createUserAndAuthTables = {
             """
             CREATE TABLE IF NOT EXISTS  usersTable (
               `username` varchar(256) NOT NULL,
