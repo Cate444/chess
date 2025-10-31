@@ -92,11 +92,7 @@ public class Server {
             AuthData authData = userService.register(user);
             writeJson(ctx, authData);
         } catch (Exception ex) {
-            switch (ex.getMessage()) {
-                case "Already exists" -> sendError(ctx, 403, "This user already exist. Try logging in");
-                case "no password", "no username" -> sendError(ctx, 400, "bad request");
-                default -> sendError(ctx, 500, "internal server error");
-            }
+            throwErrorBasedOnMessage(ex, ctx);
         }
     }
 
@@ -106,11 +102,7 @@ public class Server {
             AuthData authData = userService.login(user);
             writeJson(ctx, authData);
         } catch (Exception ex) {
-            switch (ex.getMessage()) {
-                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
-                case "bad request" -> sendError(ctx, 400, "bad request");
-                default -> sendError(ctx, 500, "internal server error");
-            }
+            throwErrorBasedOnMessage(ex, ctx);
         }
     }
 
@@ -120,10 +112,7 @@ public class Server {
             userService.logout(authToken);
             ctx.status(200);
         } catch (Exception ex) {
-            switch (ex.getMessage()) {
-                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
-                default -> sendError(ctx, 500, "internal server error");
-            }
+            throwErrorBasedOnMessage(ex, ctx);
         }
     }
 
@@ -134,11 +123,7 @@ public class Server {
             int gameID = gameService.createGame(authToken, gameName);
             writeJson(ctx, Map.of("gameID", gameID));
         } catch (Exception ex) {
-            switch (ex.getMessage()) {
-                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
-                case "bad request" -> sendError(ctx, 400, "bad request");
-                default -> sendError(ctx, 500, "internal server error");
-            }
+            throwErrorBasedOnMessage(ex, ctx);
         }
     }
 
@@ -148,11 +133,7 @@ public class Server {
             ArrayList<ReturnGameData> games = gameService.listGames(authToken);
             writeJson(ctx, Map.of("games", games));
         } catch (Exception ex) {
-            if ("unauthorized".equals(ex.getMessage())) {
-                sendError(ctx, 401, "unauthorized");
-            } else {
-                sendError(ctx, 500, "internal server error");
-            }
+            throwErrorBasedOnMessage(ex, ctx);
         }
     }
 
@@ -163,12 +144,7 @@ public class Server {
             gameService.joinGame(authToken, joinInfo);
             ctx.status(200);
         } catch (Exception ex) {
-            switch (ex.getMessage()) {
-                case "unauthorized" -> sendError(ctx, 401, "unauthorized");
-                case "bad request" -> sendError(ctx, 400, "bad request");
-                case "already taken" -> sendError(ctx, 403, "team already has player");
-                default -> sendError(ctx, 500, "internal server error");
-            }
+           throwErrorBasedOnMessage(ex, ctx);
         }
     }
 
@@ -179,5 +155,16 @@ public class Server {
 
     public void stop() {
         server.stop();
+    }
+
+    private void throwErrorBasedOnMessage(Exception ex, Context ctx){
+        switch (ex.getMessage()) {
+            case "unauthorized" -> sendError(ctx, 401, "unauthorized");
+            case "bad request" -> sendError(ctx, 400, "bad request");
+            case "already taken" -> sendError(ctx, 403, "team already has player");
+            case "already exists" -> sendError(ctx, 403, "This user already exist. Try logging in");
+            case "no password", "no username" -> sendError(ctx, 400, "bad request");
+            default -> sendError(ctx, 500, "internal server error");
+        }
     }
 }

@@ -71,7 +71,7 @@ public class SQLUserDataAccess implements UserDataAccess{
                 preparedStatement.setString(1, userData.username());
                 ResultSet rs = preparedStatement.executeQuery();
                 if (rs.next()) {
-                    throw new Exception("Already exists");
+                    throw new Exception("already exists");
                 }
             }
             String insertUser = "INSERT INTO usersTable(username, email, password) " +
