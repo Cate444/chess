@@ -227,12 +227,37 @@ class DataAccessTest {
     }
 
     @Test
-    void createGame_throwsException_whenGameNameIsNull() throws Exception {
+    void createGameNameIsNull() throws Exception {
         SQLGameDataAccess gameDataAccess = new SQLGameDataAccess();
         Exception exception = assertThrows(Exception.class, () -> {
             gameDataAccess.createGame(new GameName(null));
         });
     }
 
+    @Test
+    void listGames() throws Exception{
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        gameDataAccess.createGame(new GameName("AGame"));
+        gameDataAccess.createGame(new GameName("AnotherOne"));
+        gameDataAccess.createGame(new GameName("Your Mom"));
+        assertEquals(gameDataAccess.listGames().size(), 3);
+    }
+
+    @Test
+    void listGamesMissingTable() throws Exception {
+        SQLGameDataAccess gameDataAccess = new SQLGameDataAccess();
+
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement("DROP TABLE gameTable")) {
+            stmt.executeUpdate();
+        }
+
+        Exception exception = assertThrows(Exception.class, gameDataAccess::listGames);
+    }
 
 }
