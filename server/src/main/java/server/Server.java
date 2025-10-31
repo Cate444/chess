@@ -9,8 +9,6 @@ import datamodel.*;
 import service.GameService;
 import service.UserService;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 public class Server {

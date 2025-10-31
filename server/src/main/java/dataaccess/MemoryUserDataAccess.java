@@ -23,9 +23,7 @@ public class MemoryUserDataAccess implements UserDataAccess {
         }
     }
 
-//    public UserData getUser(UserData userData) {
-//        return users.get(userData.username());
-//    }
+
 
 
     @Override

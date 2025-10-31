@@ -40,7 +40,7 @@ public class SQLGameDataAccess implements GameDataAccess {
     };
 
     @Override
-    public Executable clear()throws Exception{
+    public void clear()throws Exception{
         try (Connection conn = DatabaseManager.getConnection()) {
             String deleteAllGames = "DELETE FROM gameTable";
             try (var preparedStatement = conn.prepareStatement(deleteAllGames)) {
@@ -49,7 +49,6 @@ public class SQLGameDataAccess implements GameDataAccess {
         } catch (DataAccessException | SQLException e) {
             throw new Exception(e.getMessage());
         }
-        return null;
     }
 
     @Override

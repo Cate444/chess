@@ -13,10 +13,9 @@ public class MemoryGameDataAccess implements GameDataAccess {
     public final ArrayList<GameData> gameList = new ArrayList<>();
     private int gameCount = 1;
 
-    public Executable clear() {
+    public void clear() {
         gameList.clear();
         gameCount = 1;
-        return null;
     }
 
     @Override
