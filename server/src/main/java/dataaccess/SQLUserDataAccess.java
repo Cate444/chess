@@ -123,6 +123,7 @@ public class SQLUserDataAccess implements UserDataAccess{
         }
     }
 
+    //
     @Override
     public void logout(String authToken) throws Exception{
         try (Connection conn = DatabaseManager.getConnection()){

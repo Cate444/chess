@@ -5,6 +5,7 @@ import datamodel.GameName;
 import datamodel.JoinInfo;
 import datamodel.UserData;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.Server;
@@ -174,4 +175,34 @@ class DataAccessTest {
         assertThrows(Exception.class, ()->userDataAccess.logout(authToken));
     }
 
+    @Test
+    void authenticate() throws Exception{
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        String authToken = userDataAccess.createAuthToken(user);
+        String authTokenReturned = userDataAccess.authenticate(authToken);
+        assertEquals(authToken, authTokenReturned);
+    }
+
+    @Test
+    void authenticateFail() throws Exception{
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        String authToken = userDataAccess.createAuthToken(user);
+        String wrongAthToken = userDataAccess.createAuthToken(user);
+        String authTokenReturned = userDataAccess.authenticate(wrongAthToken);
+        assertNotEquals(authToken, authTokenReturned);
+    }
 }
