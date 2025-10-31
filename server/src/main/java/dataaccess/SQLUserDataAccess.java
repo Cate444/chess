@@ -42,6 +42,7 @@ public class SQLUserDataAccess implements UserDataAccess{
             """
     };
 
+    //
     @Override
     public Executable clear() throws Exception{
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -63,6 +64,7 @@ public class SQLUserDataAccess implements UserDataAccess{
         return null;
     }
 
+    //
     @Override
     public void createUser(UserData userData) throws Exception {
         String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
@@ -88,13 +90,12 @@ public class SQLUserDataAccess implements UserDataAccess{
         }
     }
 
+    //
     @Override
     public String createAuthToken(UserData userData) throws Exception{
         String authToken = UUID.randomUUID().toString();
         try (Connection conn = DatabaseManager.getConnection()){
-
             String lookUpUser = "SELECT * FROM usersTable WHERE username = ?";
-
             try (var preparedStatement = conn.prepareStatement(lookUpUser)) {
                 preparedStatement.setString(1, userData.username());
                 ResultSet rs = preparedStatement.executeQuery();
@@ -121,6 +122,7 @@ public class SQLUserDataAccess implements UserDataAccess{
             throw ex;
         }
     }
+
     @Override
     public void logout(String authToken) throws Exception{
         try (Connection conn = DatabaseManager.getConnection()){

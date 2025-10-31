@@ -87,6 +87,8 @@ class DataAccessTest {
         DatabaseManager.createDatabase();
         UserDataAccess userDataAccess = new SQLUserDataAccess();
         GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
 
         UserData user = new UserData("Heather", "heather@gmail.com", "T+H");
         userDataAccess.createUser(user);
@@ -97,10 +99,79 @@ class DataAccessTest {
 
 
     @Test
-    void getAuthToken() {
+    void createAuthToken() throws Exception {
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        String authToken = userDataAccess.createAuthToken(user);
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT authToken FROM authTable WHERE username = ?");
+            stmt.setString(1, "Ty");
+            ResultSet rs = stmt.executeQuery();
+            assertTrue(rs.next());
+            assertEquals(authToken, rs.getString("authToken"));
+        }
     }
 
     @Test
-    void logout() throws Exception{
+    void createAuthTokenTwice() throws Exception {
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        userDataAccess.createAuthToken(user);
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT authToken FROM authTable WHERE username = ?");
+            stmt.setString(1, "Ty");
+            ResultSet rs = stmt.executeQuery();
+            assertTrue(rs.next());
+            assertNotEquals(userDataAccess.createAuthToken(user), rs.getString("authToken"));
+        }
     }
+
+    @Test
+    void logout() throws Exception {
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        String authToken = userDataAccess.createAuthToken(user);
+        userDataAccess.logout(authToken);
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT authToken FROM authTable WHERE username = ?");
+            stmt.setString(1, "Ty");
+            ResultSet rs = stmt.executeQuery();
+            assertTrue(!rs.next());
+        }
+    }
+
+    @Test
+    void logoutWrongAuthToken() throws Exception {
+        DatabaseManager.createDatabase();
+        UserDataAccess userDataAccess = new SQLUserDataAccess();
+        GameDataAccess gameDataAccess = new SQLGameDataAccess();
+        userDataAccess.clear();
+        gameDataAccess.clear();
+
+        UserData user = new UserData("Ty", "TYJ@gmail.com", "11/05");
+        userDataAccess.createUser(user);
+        String authToken = userDataAccess.createAuthToken(user);
+        userDataAccess.logout(authToken);
+
+        assertThrows(Exception.class, ()->userDataAccess.logout(authToken));
+    }
+
 }
