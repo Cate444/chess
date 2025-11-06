@@ -2,10 +2,13 @@ package ui;
 
 import java.util.Map;
 import java.util.Scanner;
+import server.ServerFacade;
 
 public class Client {
+    ServerFacade server;
+
     Boolean loggedIn;
-    Boolean InGame;
+    Boolean inGame;
     String authToken;
 
     private final Map<String, Integer> letters = Map.of(
@@ -19,11 +22,10 @@ public class Client {
             "h", 8
     );
 
-    public Client() {
+    public Client(String serverUrl) {
        loggedIn = false;
-       InGame = false;
-
-
+       inGame = false;
+       server = new ServerFacade(serverUrl);
     }
 
     public void run(){
@@ -31,31 +33,10 @@ public class Client {
 
         label:
         while (true){
-            if (InGame){
-                System.out.print("[PLAYING] >>>");
-                String input = scanner.nextLine();
-                String[] tokens = input.split("\\s+");
-                if (tokens.length > 0){
-                    String command = tokens[0];
-                    switch (command) {
-                        case ("quit"):
-                            break label;
-                        case ("login"):
-                            login(tokens);
-                            break;
-                        case("register"):
-                            register(tokens);
-                            break;
-                        case("help"):
-                            System.out.println(
-                                    "register <USERNAME> <EMAIL> <PASSWORD> - create an account \n" +
-                                            "login <USERNAME> <PASSWORD> - to log into an existing account \n" +
-                                            "quit - to exit\n" +
-                                            "help - see options" );
-                    }
-                }
+            if (inGame){
+                System.out.print("[PLAYING] >>> ");
             } else if (loggedIn){
-                System.out.print("[LOGGED IN] >>>");
+                System.out.print("[LOGGED IN] >>> ");
                 String input = scanner.nextLine();
                 String[] tokens = input.split("\\s+");
                 if (tokens.length > 0){
@@ -78,19 +59,40 @@ public class Client {
                         case("observe game"):
                             observeGame(tokens);
                             break;
-                        case("help"):
+                        default:
                             System.out.println(
-                                    "logout - logs you out \n" +
+                                            "logout - logs you out \n" +
                                             "create game <GAME NAME> - creates game \n" +
-                                            "list games - list active games" +
-                                            "play game <ID> [WHITE|BLACK]- lets you join game and specifies color" +
-                                            "observe game <ID> " +
+                                            "list games - list active games\n" +
+                                            "play game <ID> [WHITE|BLACK]- lets you join game and specifies color\n" +
+                                            "observe game <ID>\n " +
                                             "quit - to exit\n" +
                                             "help - see options" );
                     }
                 }
             } else {
-                System.out.print("[LOGGED OUT] >>>");
+                System.out.print("[LOGGED OUT] >>> ");
+                String input = scanner.nextLine();
+                String[] tokens = input.split("\\s+");
+                if (tokens.length > 0){
+                    String command = tokens[0];
+                    switch (command) {
+                        case ("quit"):
+                            break label;
+                        case ("login"):
+                            login(tokens);
+                            break;
+                        case("register"):
+                            register(tokens);
+                            break;
+                        default:
+                            System.out.println(
+                                            "register <USERNAME> <EMAIL> <PASSWORD> - create an account \n" +
+                                            "login <USERNAME> <PASSWORD> - to log into an existing account \n" +
+                                            "quit - to exit\n" +
+                                            "help - see options" );
+                    }
+                }
             }
         }
     }
@@ -102,7 +104,7 @@ public class Client {
             String email = tokens[2];
             String password = tokens[3];
             try{
-                // call to server to register
+                server.register(username, email, password);
             } catch (Exception ex){
                 System.out.println(ex.getMessage());
             }
