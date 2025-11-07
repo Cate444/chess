@@ -123,7 +123,7 @@ public class Client {
             String username = tokens[1];
             String password = tokens[2];
             try {
-                //authData = server.login(username, password);
+                authData = server.login(username, password);
                 loggedIn = true;
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());

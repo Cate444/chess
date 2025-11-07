@@ -10,7 +10,6 @@ public class Main {
         if (args.length == 1) {
             serverUrl = args[0];
         }
-
         try {
             new Client(serverUrl).run();
 
