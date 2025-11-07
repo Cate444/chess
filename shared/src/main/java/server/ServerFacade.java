@@ -11,9 +11,10 @@ import java.net.http.HttpResponse.BodyHandlers;
 import datamodel.*;
 
 import java.net.http.HttpClient;
+import java.util.Locale;
 
 public class ServerFacade {
-    private final HttpClient client = HttpClient.newHttpClient();
+    private static final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
     public ServerFacade(String url) {
@@ -21,15 +22,24 @@ public class ServerFacade {
     }
 
     public AuthData register(String username, String email, String password) throws Exception{
-        var request = buildRequest("POST", "/user", new UserData(username, email, password));
+        var request = buildRequest("POST", "/user", new UserData(username, email, password), null);
         var response = sendRequest(request);
         return handleResponse(response, datamodel.AuthData.class);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    public void logout(String authToken) throws Exception {
+        var request = buildRequest("DELETE", "/session", null, authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+    private HttpRequest buildRequest(String method, String path, Object body, String header) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
+        if (header != null){
+            request.header("Authorization" , header);
+        }
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }

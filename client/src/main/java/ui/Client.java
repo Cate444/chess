@@ -2,6 +2,8 @@ package ui;
 
 import java.util.Map;
 import java.util.Scanner;
+
+import datamodel.AuthData;
 import server.ServerFacade;
 
 public class Client {
@@ -9,7 +11,7 @@ public class Client {
 
     Boolean loggedIn;
     Boolean inGame;
-    String authToken;
+    AuthData authData;
 
     private final Map<String, Integer> letters = Map.of(
             "a" , 1,
@@ -45,7 +47,7 @@ public class Client {
                         case ("quit"):
                             break label;
                         case ("logout"):
-                            logout(tokens);
+                            logout();
                             break;
                         case("create game"):
                             createGame(tokens);
@@ -61,13 +63,14 @@ public class Client {
                             break;
                         default:
                             System.out.println(
-                                            "logout - logs you out \n" +
-                                            "create game <GAME NAME> - creates game \n" +
-                                            "list games - list active games\n" +
-                                            "play game <ID> [WHITE|BLACK]- lets you join game and specifies color\n" +
-                                            "observe game <ID>\n " +
-                                            "quit - to exit\n" +
-                                            "help - see options" );
+                                    """
+                                            logout - logs you out\s
+                                            create game <GAME NAME> - creates game\s
+                                            list games - list active games
+                                            play game <ID> [WHITE|BLACK]- lets you join game and specifies color
+                                            observe game <ID>
+                                            quit - to exit
+                                            help - see options""");
                     }
                 }
             } else {
@@ -87,10 +90,11 @@ public class Client {
                             break;
                         default:
                             System.out.println(
-                                            "register <USERNAME> <EMAIL> <PASSWORD> - create an account \n" +
-                                            "login <USERNAME> <PASSWORD> - to log into an existing account \n" +
-                                            "quit - to exit\n" +
-                                            "help - see options" );
+                                    """
+                                            register <USERNAME> <EMAIL> <PASSWORD> - create an account\s
+                                            login <USERNAME> <PASSWORD> - to log into an existing account\s
+                                            quit - to exit
+                                            help - see options""");
                     }
                 }
             }
@@ -104,7 +108,8 @@ public class Client {
             String email = tokens[2];
             String password = tokens[3];
             try{
-                server.register(username, email, password);
+                authData = server.register(username, email, password);
+                loggedIn = true;
             } catch (Exception ex){
                 System.out.println(ex.getMessage());
             }
@@ -118,16 +123,18 @@ public class Client {
             String username = tokens[1];
             String password = tokens[2];
             try {
-                // call to server to login
+                //authData = server.login(username, password);
+                loggedIn = true;
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
         }
     }
 
-    private void logout(String[] tokens){
+    private void logout(){
         try{
-            // call server to logout
+            server.logout(authData.authToken());
+            loggedIn = false;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -175,11 +182,11 @@ public class Client {
 
     private void observeGame(String[] tokens){
         if (tokens.length != 2){
-            System.out.println("Invalid number of arguments. Usage: abserve game <ID> ");
+            System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
         } else{
             String id = tokens[1];
             try{
-                // call to server to abserve game
+                // call to server to observe game
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }

@@ -160,10 +160,9 @@ public class Server {
     private void throwErrorBasedOnMessage(Exception ex, Context ctx){
         switch (ex.getMessage()) {
             case "unauthorized" -> sendError(ctx, 401, "unauthorized");
-            case "bad request" -> sendError(ctx, 400, "bad request");
+            case "bad request", "no password", "no username" -> sendError(ctx, 400, "bad request");
             case "already taken" -> sendError(ctx, 403, "team already has player");
             case "already exists" -> sendError(ctx, 403, "This user already exist. Try logging in");
-            case "no password", "no username" -> sendError(ctx, 400, "bad request");
             default -> sendError(ctx, 500, "internal server error");
         }
     }
