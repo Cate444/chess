@@ -32,7 +32,6 @@ public class Client {
 
     public void run(){
         Scanner scanner = new Scanner(System.in);
-
         label:
         while (true){
             if (inGame){
@@ -49,7 +48,7 @@ public class Client {
                         case ("logout"):
                             logout();
                             break;
-                        case("create game"):
+                        case("create"):
                             createGame(tokens);
                             break;
                         case("list games"):
@@ -141,12 +140,12 @@ public class Client {
     }
 
     private void createGame(String[] tokens){
-        if (tokens.length != 2){
+        if (tokens.length != 3){
             System.out.println("Invalid number of arguments. Usage: create game <GAME NAME>");
         } else {
-            String gameName = tokens[1];
+            String gameName = tokens[2];
             try{
-                // call to server to create game
+                Map<String, Integer> gameId = server.createGame(authData.authToken(), gameName);
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }

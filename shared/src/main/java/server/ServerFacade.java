@@ -1,6 +1,5 @@
 package server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 
 import java.net.*;
@@ -11,7 +10,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import datamodel.*;
 
 import java.net.http.HttpClient;
-import java.util.Locale;
+import java.util.Map;
 
 public class ServerFacade {
     private static final HttpClient client = HttpClient.newHttpClient();
@@ -37,6 +36,12 @@ public class ServerFacade {
         var request = buildRequest("POST", "/session", new UserData(username, null, password), null);
         var response = sendRequest(request);
         return handleResponse(response, datamodel.AuthData.class);
+    }
+
+    public Map<String, Integer> createGame(String authToken, String gameName) throws Exception{
+        var request = buildRequest("POST", "/game", new GameName(gameName), authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, Map.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String header) {
