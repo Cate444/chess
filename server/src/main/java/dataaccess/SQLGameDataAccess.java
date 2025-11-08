@@ -108,7 +108,7 @@ public class SQLGameDataAccess implements GameDataAccess {
                        throw new DataAccessException("Bad Request");
                    }
                    if (rs.getString("whiteUsername") != null && joinInfo.playerColor() == ChessGame.TeamColor.WHITE) {
-                       throw new DataAccessException("already Taken");
+                       throw new DataAccessException("already taken");
                    }
                    if (rs.getString("blackUsername") != null && joinInfo.playerColor() == ChessGame.TeamColor.BLACK) {
                        throw new DataAccessException("already taken");

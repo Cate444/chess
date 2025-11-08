@@ -1,5 +1,7 @@
 package server;
 
+import chess.ChessGame;
+import chess.ChessGame.TeamColor;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
@@ -53,6 +55,13 @@ public class ServerFacade {
         var response = sendRequest(request);
         Type responseType = new TypeToken<Map<String, List<ReturnGameData>>>() {}.getType();
         return handleResponse(response, responseType);
+    }
+
+    public void joinGame(String authToken, int id, TeamColor color) throws Exception {
+        ChessGame.TeamColor teamColor = color;
+        var request = buildRequest("PUT", "/game", new JoinInfo(teamColor, id), authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String header) {

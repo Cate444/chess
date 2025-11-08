@@ -2,6 +2,7 @@ package ui;
 
 import java.util.*;
 
+import chess.ChessGame;
 import datamodel.AuthData;
 import datamodel.ReturnGameData;
 import server.ServerFacade;
@@ -36,6 +37,14 @@ public class Client {
         while (true){
             if (inGame){
                 System.out.print("[PLAYING] >>> ");
+                String input = scanner.nextLine();
+                String[] tokens = input.split("\\s+");
+                if (tokens.length > 0){
+                    String command = tokens[0];
+                    switch (command){
+
+                    }
+                }
             } else if (loggedIn){
                 System.out.print("[LOGGED IN] >>> ");
                 String input = scanner.nextLine();
@@ -54,7 +63,7 @@ public class Client {
                         case("list"):
                             listGames(tokens);
                             break;
-                        case("play game"):
+                        case("play"):
                             playGame(tokens);
                             break;
                         case("observe game"):
@@ -174,11 +183,14 @@ public class Client {
     private void playGame(String[] tokens){
         if (tokens.length != 3){
             System.out.println("Invalid number of arguments. Usage: play game <ID> [WHITE|BLACK]");
+        } if (!(Objects.equals(tokens[2], "WHITE") | Objects.equals(tokens[2], "BLACK"))){
+            System.out.println("Invalid argument. Usage: play game <ID> [WHITE|BLACK]");
         } else {
-            String id = tokens[1];
-            String color = tokens[2];
+            int id = Integer.parseInt(tokens[1]);
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2]);
             try {
-                // call to server to play game
+                server.joinGame(authData.authToken(), id, color);
+                inGame = true;
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
