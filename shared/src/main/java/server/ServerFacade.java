@@ -2,14 +2,18 @@ package server;
 
 import com.google.gson.Gson;
 
+import java.lang.reflect.Type;
 import java.net.*;
 import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+
+import com.google.gson.reflect.TypeToken;
 import datamodel.*;
 
 import java.net.http.HttpClient;
+import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
@@ -44,6 +48,13 @@ public class ServerFacade {
         return handleResponse(response, Map.class);
     }
 
+    public Map<String, Object> listGames(String authToken) throws Exception {
+        var request = buildRequest("GET", "/game", null, authToken);
+        var response = sendRequest(request);
+        Type responseType = new TypeToken<Map<String, List<ReturnGameData>>>() {}.getType();
+        return handleResponse(response, responseType);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body, String header) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
@@ -73,7 +84,7 @@ public class ServerFacade {
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
+    private <T> T handleResponse(HttpResponse<String> response, Type responseType) throws Exception {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
@@ -84,8 +95,8 @@ public class ServerFacade {
             throw new Exception("other failure: " + status);
         }
 
-        if (responseClass != null) {
-            return new Gson().fromJson(response.body(), responseClass);
+        if (responseType != null) {
+            return new Gson().fromJson(response.body(), responseType);
         }
 
         return null;

@@ -1,9 +1,9 @@
 package ui;
 
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import datamodel.AuthData;
+import datamodel.ReturnGameData;
 import server.ServerFacade;
 
 public class Client {
@@ -51,7 +51,7 @@ public class Client {
                         case("create"):
                             createGame(tokens);
                             break;
-                        case("list games"):
+                        case("list"):
                             listGames(tokens);
                             break;
                         case("play game"):
@@ -154,11 +154,17 @@ public class Client {
 
     private void listGames(String[] tokens){
         if (tokens.length != 2){
-            System.out.println("Invalid number of arguments. Usage: list games <ID>");
+            System.out.println("Invalid number of arguments. Usage: list games");
         } else {
-        String id = tokens[1];
         try{
-            // call to server to list games
+            Map<String, Object> games = server.listGames(authData.authToken());
+
+            List<ReturnGameData> gameList = (List<ReturnGameData>) games.get("games");
+            System.out.println("Game ID | Game Name");
+            for (ReturnGameData game : gameList) {
+                System.out.printf("  %d:    %s%n", game.gameID(), game.gameName());
+            }
+
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
