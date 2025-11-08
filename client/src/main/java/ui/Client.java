@@ -12,6 +12,7 @@ public class Client {
 
     Boolean loggedIn;
     Boolean inGame;
+    Boolean observing;
     AuthData authData;
 
     private final Map<String, Integer> letters = Map.of(
@@ -28,6 +29,7 @@ public class Client {
     public Client(String serverUrl) {
        loggedIn = false;
        inGame = false;
+       observing = false;
        server = new ServerFacade(serverUrl);
     }
 
@@ -37,6 +39,16 @@ public class Client {
         while (true){
             if (inGame){
                 System.out.print("[PLAYING] >>> ");
+                String input = scanner.nextLine();
+                String[] tokens = input.split("\\s+");
+                if (tokens.length > 0){
+                    String command = tokens[0];
+                    switch (command){
+
+                    }
+                }
+            } else if(observing){
+                System.out.print("[OBSERVING] >>> ");
                 String input = scanner.nextLine();
                 String[] tokens = input.split("\\s+");
                 if (tokens.length > 0){
@@ -66,7 +78,7 @@ public class Client {
                         case("play"):
                             playGame(tokens);
                             break;
-                        case("observe game"):
+                        case("observe"):
                             observeGame(tokens);
                             break;
                         default:
@@ -198,12 +210,13 @@ public class Client {
     }
 
     private void observeGame(String[] tokens){
-        if (tokens.length != 2){
+        if (tokens.length != 3){
             System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
         } else{
-            String id = tokens[1];
+            int id = Integer.parseInt(tokens[2]);
             try{
                 // call to server to observe game
+                observing = true;
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
