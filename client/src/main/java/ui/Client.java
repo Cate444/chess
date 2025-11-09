@@ -44,7 +44,17 @@ public class Client {
                 if (tokens.length > 0){
                     String command = tokens[0];
                     switch (command){
-
+                        case ("menu"):
+                            observing = false;
+                            break;
+                        case ("quit"):
+                            break label;
+                        default:
+                            System.out.println(
+                                    """
+                                            menu - return to login state
+                                            quit - to exit
+                                            help - see options""");
                     }
                 }
             } else if(observing){
@@ -54,8 +64,19 @@ public class Client {
                 if (tokens.length > 0){
                     String command = tokens[0];
                     switch (command){
-
+                        case ("menu"):
+                            observing = false;
+                            break;
+                        case ("quit"):
+                            break label;
+                        default:
+                            System.out.println(
+                                    """
+                                            menu - return to login state
+                                            quit - to exit
+                                            help - see options""");
                     }
+
                 }
             } else if (loggedIn){
                 System.out.print("[LOGGED IN] >>> ");
@@ -87,7 +108,7 @@ public class Client {
                                             logout - logs you out\s
                                             create game <GAME NAME> - creates game\s
                                             list games - list active games
-                                            play game <ID> [WHITE|BLACK]- lets you join game and specifies color
+                                            play <ID> [WHITE|BLACK]- lets you join game and specifies color
                                             observe game <ID>
                                             quit - to exit
                                             help - see options""");
@@ -202,6 +223,8 @@ public class Client {
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2]);
             try {
                 server.joinGame(authData.authToken(), id, color);
+                RenderBoard renderBoard = new RenderBoard();
+                renderBoard.render(tokens[1]);
                 inGame = true;
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -210,12 +233,14 @@ public class Client {
     }
 
     private void observeGame(String[] tokens){
-        if (tokens.length != 3){
+        if (tokens.length != 2){
             System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
         } else{
-            int id = Integer.parseInt(tokens[2]);
+            int id = Integer.parseInt(tokens[1]);
             try{
-                // call to server to observe game
+
+                RenderBoard renderBoard = new RenderBoard();
+                renderBoard.render("WHITE");
                 observing = true;
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
