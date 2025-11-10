@@ -97,8 +97,8 @@ public class RenderBoard {
                 } else{isWhiteSquare = (boardRow + boardCol) % 2 == 0;}
 
 
-                if (isWhiteSquare) setWhite(out);
-                else setBlue(out);
+                if (isWhiteSquare){setWhite(out);}
+                else {setBlue(out);}
 
 
                 if (color == "w"){

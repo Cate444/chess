@@ -33,114 +33,97 @@ public class Client {
        server = new ServerFacade(serverUrl);
     }
 
-    public void run(){
+    public void run() {
         Scanner scanner = new Scanner(System.in);
         label:
-        while (true){
-            if (inGame){
-                System.out.print("[PLAYING] >>> ");
-                String input = scanner.nextLine();
-                String[] tokens = input.split("\\s+");
-                if (tokens.length > 0){
-                    String command = tokens[0];
-                    switch (command){
-                        case ("menu"):
-                            observing = false;
-                            break;
-                        case ("quit"):
-                            break label;
-                        default:
-                            System.out.println(
-                                    """
-                                            menu - return to login state
-                                            quit - to exit
-                                            help - see options""");
-                    }
-                }
-            } else if(observing){
-                System.out.print("[OBSERVING] >>> ");
-                String input = scanner.nextLine();
-                String[] tokens = input.split("\\s+");
-                if (tokens.length > 0){
-                    String command = tokens[0];
-                    switch (command){
-                        case ("menu"):
-                            observing = false;
-                            break;
-                        case ("quit"):
-                            break label;
-                        default:
-                            System.out.println(
-                                    """
-                                            menu - return to login state
-                                            quit - to exit
-                                            help - see options""");
-                    }
-
-                }
-            } else if (loggedIn){
-                System.out.print("[LOGGED IN] >>> ");
-                String input = scanner.nextLine();
-                String[] tokens = input.split("\\s+");
-                if (tokens.length > 0){
-                    String command = tokens[0];
-                    switch (command) {
-                        case ("quit"):
-                            break label;
-                        case ("logout"):
-                            logout();
-                            break;
-                        case("create"):
-                            createGame(tokens);
-                            break;
-                        case("list"):
-                            listGames(tokens);
-                            break;
-                        case("play"):
-                            playGame(tokens);
-                            break;
-                        case("observe"):
-                            observeGame(tokens);
-                            break;
-                        default:
-                            System.out.println(
-                                    """
-                                            logout - logs you out\s
-                                            create game <GAME NAME> - creates game\s
-                                            list games - list active games
-                                            play <ID> [WHITE|BLACK]- lets you join game and specifies color
-                                            observe game <ID>
-                                            quit - to exit
-                                            help - see options""");
-                    }
-                }
+        while (true) {
+            if (inGame) {
+                if (!handleInGame(scanner)){ break label;}
+            } else if (observing) {
+                if (!handleObserving(scanner)){ break label;}
+            } else if (loggedIn) {
+                if (!handleLoggedIn(scanner)){ break label;}
             } else {
-                System.out.print("[LOGGED OUT] >>> ");
-                String input = scanner.nextLine();
-                String[] tokens = input.split("\\s+");
-                if (tokens.length > 0){
-                    String command = tokens[0];
-                    switch (command) {
-                        case ("quit"):
-                            break label;
-                        case ("login"):
-                            login(tokens);
-                            break;
-                        case("register"):
-                            register(tokens);
-                            break;
-                        default:
-                            System.out.println(
-                                    """
-                                            register <USERNAME> <EMAIL> <PASSWORD> - create an account\s
-                                            login <USERNAME> <PASSWORD> - to log into an existing account\s
-                                            quit - to exit
-                                            help - see options""");
-                    }
-                }
+                if (!handleLoggedOut(scanner)){ break label;}
             }
         }
     }
+
+    private boolean handleInGame(Scanner scanner) {
+        System.out.print("[PLAYING] >>> ");
+        String[] tokens = scanner.nextLine().split("\\s+");
+        if (tokens.length == 0) return true;
+        String command = tokens[0];
+
+        switch (command) {
+            case "menu" -> inGame = false;
+            case "quit" -> { return false; }
+            default -> System.out.println("""
+                    menu - return to login state
+                    quit - to exit
+                    help - see options""");
+        }
+        return true;
+    }
+
+    private boolean handleObserving(Scanner scanner) {
+        System.out.print("[OBSERVING] >>> ");
+        String[] tokens = scanner.nextLine().split("\\s+");
+        if (tokens.length == 0) return true;
+        String command = tokens[0];
+        switch (command) {
+            case "menu" -> observing = false;
+            case "quit" -> { return false; }
+            default -> System.out.println("""
+                menu - return to login state
+                quit - to exit
+                help - see options""");
+        }
+        return true;
+    }
+
+    private boolean handleLoggedIn(Scanner scanner) {
+        System.out.print("[LOGGED IN] >>> ");
+        String[] tokens = scanner.nextLine().split("\\s+");
+        if (tokens.length == 0) return true;
+        String command = tokens[0];
+        switch (command) {
+            case "quit" -> { return false; }
+            case "logout" -> logout();
+            case "create" -> createGame(tokens);
+            case "list" -> listGames(tokens);
+            case "play" -> playGame(tokens);
+            case "observe" -> observeGame(tokens);
+            default -> System.out.println("""
+                logout - logs you out
+                create game <GAME NAME> - creates game
+                list games - list active games
+                play <ID> [WHITE|BLACK] - lets you join game and specifies color
+                observe game <ID>
+                quit - to exit
+                help - see options""");
+        }
+        return true;
+    }
+
+    private boolean handleLoggedOut(Scanner scanner) {
+        System.out.print("[LOGGED OUT] >>> ");
+        String[] tokens = scanner.nextLine().split("\\s+");
+        if (tokens.length == 0) return true;
+        String command = tokens[0];
+        switch (command) {
+            case "quit" -> { return false; }
+            case "login" -> login(tokens);
+            case "register" -> register(tokens);
+            default -> System.out.println("""
+                    register <USERNAME> <EMAIL> <PASSWORD> - create an account
+                    login <USERNAME> <PASSWORD> - to log into an existing account
+                    quit - to exit
+                    help - see options""");
+        }
+        return true;
+    }
+
     private void register(String[] tokens){
         if (tokens.length != 4){
             System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>");
@@ -238,7 +221,6 @@ public class Client {
         } else{
             int id = Integer.parseInt(tokens[1]);
             try{
-
                 RenderBoard renderBoard = new RenderBoard();
                 renderBoard.render("WHITE");
                 observing = true;
@@ -246,7 +228,5 @@ public class Client {
                 System.out.println(ex.getMessage());
             }
         }
-
     }
-
 }
