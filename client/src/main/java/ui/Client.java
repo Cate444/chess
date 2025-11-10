@@ -216,11 +216,11 @@ public class Client {
     private void playGame(String[] tokens){
         if (tokens.length != 3){
             System.out.println("Invalid number of arguments. Usage: play game <ID> [WHITE|BLACK]");
-        } if (!(Objects.equals(tokens[2], "WHITE") | Objects.equals(tokens[2], "BLACK"))){
+        } if (!(Objects.equals(tokens[2].toUpperCase(), "WHITE") | Objects.equals(tokens[2].toUpperCase(), "BLACK"))){
             System.out.println("Invalid argument. Usage: play game <ID> [WHITE|BLACK]");
         } else {
             int id = Integer.parseInt(tokens[1]);
-            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2]);
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
             try {
                 server.joinGame(authData.authToken(), id, color);
                 RenderBoard renderBoard = new RenderBoard();

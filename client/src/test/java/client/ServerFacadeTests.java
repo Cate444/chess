@@ -2,11 +2,13 @@ package client;
 
 import org.junit.jupiter.api.*;
 import server.Server;
+import server.ServerFacade;
 
 
 public class ServerFacadeTests {
 
     private static Server server;
+    private static ServerFacade serverFacade = new ServerFacade("http://localhost:8080");
 
     @BeforeAll
     public static void init() {
@@ -25,5 +27,9 @@ public class ServerFacadeTests {
     public void sampleTest() {
         Assertions.assertTrue(true);
     }
+
+//    @Test
+//    public void register() throws Exception{
+//    }
 
 }
