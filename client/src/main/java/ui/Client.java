@@ -52,7 +52,7 @@ public class Client {
     private boolean handleInGame(Scanner scanner) {
         System.out.print("[PLAYING] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0){ return true;}
         String command = tokens[0];
 
         switch (command) {
@@ -69,7 +69,7 @@ public class Client {
     private boolean handleObserving(Scanner scanner) {
         System.out.print("[OBSERVING] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0){ return true;}
         String command = tokens[0];
         switch (command) {
             case "menu" -> observing = false;
@@ -85,7 +85,7 @@ public class Client {
     private boolean handleLoggedIn(Scanner scanner) {
         System.out.print("[LOGGED IN] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0) {return true;}
         String command = tokens[0];
         switch (command) {
             case "quit" -> { return false; }
@@ -109,7 +109,7 @@ public class Client {
     private boolean handleLoggedOut(Scanner scanner) {
         System.out.print("[LOGGED OUT] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0) {return true;}
         String command = tokens[0];
         switch (command) {
             case "quit" -> { return false; }

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
-    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final HttpClient newClient = HttpClient.newHttpClient();
     private final String serverUrl;
 
     public ServerFacade(String url) {
@@ -87,7 +87,7 @@ public class ServerFacade {
 
     private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
         try {
-            return client.send(request, BodyHandlers.ofString());
+            return newClient.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
             throw ex;
         }
