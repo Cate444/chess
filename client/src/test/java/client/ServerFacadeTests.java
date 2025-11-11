@@ -87,4 +87,17 @@ public class ServerFacadeTests {
         assertThrows(java.lang.Exception.class,()->serverFacade.login("Tyler", "best"));
     }
 
+    @Test
+    public void createGame() throws Exception{
+        serverFacade.clear();
+        AuthData userData = serverFacade.register("Tyler", "the", "best");
+        assertDoesNotThrow(()-> serverFacade.createGame(userData.authToken(), "Agame"));
+    }
+
+    @Test
+    public void createBadGame() throws Exception{
+        serverFacade.clear();
+        assertThrows(Exception.class,()-> serverFacade.createGame("athtoken", "Agame"));
+    }
+
 }
