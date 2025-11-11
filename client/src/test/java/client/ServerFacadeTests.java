@@ -59,4 +59,18 @@ public class ServerFacadeTests {
         assertThrows(java.lang.Exception.class, ()-> serverFacade.register("Tyler", "the", "best"));
     }
 
+    @Test
+    public void logout() throws Exception{
+        serverFacade.clear();
+        AuthData userData = serverFacade.register("Tyler", "the", "best");
+        assertDoesNotThrow(()->serverFacade.logout(userData.authToken()));
+    }
+
+    @Test
+    public void logoutWrongAuthToken() throws Exception{
+        serverFacade.clear();
+        AuthData userData = serverFacade.register("Tyler", "the", "best");
+        assertThrows(java.lang.Exception.class, ()->serverFacade.logout(userData.username()));
+    }
+
 }
