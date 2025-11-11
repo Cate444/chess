@@ -1,10 +1,14 @@
 package client;
 
 import datamodel.AuthData;
+import datamodel.ReturnGameData;
 import datamodel.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,8 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ServerFacadeTests {
 
     private static Server server;
-    private static ServerFacade serverFacade = new ServerFacade("http://localhost:8080");
-    private Class<? extends Throwable> Exception;
+    private static final ServerFacade serverFacade = new ServerFacade("http://localhost:8080");
 
     @BeforeAll
     public static void init() {
@@ -34,22 +37,23 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void clear() throws Exception{
-        assertDoesNotThrow(()-> serverFacade.clear());
+    public void clear() {
+        assertDoesNotThrow(serverFacade::clear);
     }
+
     @Test
     public void clearBad() throws Exception{
         AuthData userData = serverFacade.register("u", "e", "p");
         serverFacade.logout(userData.authToken());
         serverFacade.login("u", "p");
-        assertDoesNotThrow(()-> serverFacade.clear());
+        assertDoesNotThrow(serverFacade::clear);
     }
 
     @Test
     public void register() throws Exception{
         serverFacade.clear();
         AuthData userData = serverFacade.register("u", "e", "p");
-        assertEquals(userData.username(), "u");
+        assertEquals( "u", userData.username());
     }
 
     @Test
@@ -97,7 +101,21 @@ public class ServerFacadeTests {
     @Test
     public void createBadGame() throws Exception{
         serverFacade.clear();
-        assertThrows(Exception.class,()-> serverFacade.createGame("athtoken", "Agame"));
+        assertThrows(Exception.class,()-> serverFacade.createGame("athToken", "Agame"));
+    }
+
+    @Test
+    public void listGame() throws Exception{
+        serverFacade.clear();
+        AuthData userData = serverFacade.register("Tyler", "the", "best");
+        Map<String, Object> gameList = serverFacade.listGames(userData.authToken());
+        assertEquals(1, gameList.size());
+    }
+
+    @Test
+    public void listGamesUnauthorized() throws Exception{
+        serverFacade.clear();
+        assertThrows(Exception.class ,()->serverFacade.listGames("token"));
     }
 
 }
