@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import datamodel.AuthData;
 import datamodel.ReturnGameData;
 import datamodel.UserData;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -118,4 +120,25 @@ public class ServerFacadeTests {
         assertThrows(Exception.class ,()->serverFacade.listGames("token"));
     }
 
+    @Test
+    public void joinGame() throws Exception{
+        serverFacade.clear();
+        AuthData userData = serverFacade.register("Tyler", "the", "best");
+        serverFacade.createGame(userData.authToken(), "Agame");
+        Map<String, Object> gameList = serverFacade.listGames(userData.authToken());
+        ArrayList<ReturnGameData> gameDatas = (ArrayList<ReturnGameData>) gameList.get("games");
+        ReturnGameData gameData = gameDatas.get(0);
+        assertDoesNotThrow(()->serverFacade.joinGame(userData.authToken(), gameData.gameID(), ChessGame.TeamColor.WHITE));
+    }
+
+    @Test
+    public void joinGamesUnauthorized() throws Exception{
+        serverFacade.clear();
+        AuthData userData = serverFacade.register("Tyler", "the", "best");
+        serverFacade.createGame(userData.authToken(), "Agame");
+        Map<String, Object> gameList = serverFacade.listGames(userData.authToken());
+        ArrayList<ReturnGameData> gameDatas = (ArrayList<ReturnGameData>) gameList.get("games");
+        ReturnGameData gameData = gameDatas.get(0);
+        assertThrows(Exception.class ,()->serverFacade.joinGame("token", gameData.gameID(), ChessGame.TeamColor.WHITE));
+    }
 }
