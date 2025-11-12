@@ -99,7 +99,7 @@ public class Client {
                 create game <GAME NAME> - creates game
                 list games - list active games
                 play <ID> [WHITE|BLACK] - lets you join game and specifies color
-                observe game <ID>
+                observe <ID>
                 quit - to exit
                 help - see options""");
         }
@@ -150,7 +150,10 @@ public class Client {
                 authData = server.login(username, password);
                 loggedIn = true;
             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                switch (ex.getMessage().toString()){
+                        case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("Username doesn't exist");
+                        default -> System.out.println("internal server error");
+                    }
             }
         }
     }
@@ -171,8 +174,12 @@ public class Client {
             String gameName = tokens[2];
             try{
                 Map<String, Integer> gameId = server.createGame(authData.authToken(), gameName);
+                System.out.printf("%s id is %s %n", gameName, gameId.get("gameID"));
             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                switch (ex.getMessage()){
+                    case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
+                    default -> System.out.println("internal server error");
+                }
             }
         }
     }
@@ -185,13 +192,16 @@ public class Client {
             Map<String, Object> games = server.listGames(authData.authToken());
 
             List<ReturnGameData> gameList = (List<ReturnGameData>) games.get("games");
-            System.out.println("Game ID | Game Name");
+            System.out.println("Game Name: WhitePlayer, BlackPlayer");
             for (ReturnGameData game : gameList) {
-                System.out.printf("  %d:    %s%n", game.gameID(), game.gameName());
+                System.out.printf("  %s: %s, %s%n", game.gameName(), game.whiteUsername(), game.blackUsername());
             }
 
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            switch (ex.getMessage()){
+                case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
+                default -> System.out.println("internal server error");
+            }
         }
         }
     }
@@ -199,7 +209,7 @@ public class Client {
     private void playGame(String[] tokens){
         if (tokens.length != 3){
             System.out.println("Invalid number of arguments. Usage: play game <ID> [WHITE|BLACK]");
-        } if (!(Objects.equals(tokens[2].toUpperCase(), "WHITE") | Objects.equals(tokens[2].toUpperCase(), "BLACK"))){
+        } else if (!(Objects.equals(tokens[2].toUpperCase(), "WHITE") | Objects.equals(tokens[2].toUpperCase(), "BLACK"))){
             System.out.println("Invalid argument. Usage: play game <ID> [WHITE|BLACK]");
         } else {
             int id = Integer.parseInt(tokens[1]);
@@ -207,10 +217,14 @@ public class Client {
             try {
                 server.joinGame(authData.authToken(), id, color);
                 RenderBoard renderBoard = new RenderBoard();
-                renderBoard.render(tokens[1]);
+                renderBoard.render(tokens[2]);
                 inGame = true;
             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                switch (ex.getMessage().toString()){
+                    case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
+                    case "body exception: {\"message\":\"Error: team already has player\"}" -> System.out.println("team already has player");
+                    default -> System.out.println("internal server error");
+                }
             }
         }
     }
@@ -225,7 +239,10 @@ public class Client {
                 renderBoard.render("WHITE");
                 observing = true;
             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                switch (ex.getMessage()){
+                    case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
+                    default -> System.out.println("internal server error");
+                }
             }
         }
     }

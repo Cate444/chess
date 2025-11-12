@@ -2,16 +2,16 @@ package ui;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 
 public class RenderBoard {
 
     private static final int BOARD_SIZE_IN_SQUARES = 8;
-    private static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
-    private String teamColor;
+//    private String teamColor;
 
-    private static final String[][] WHITE_CHESS_START = {
+    private static final String[][] WHITE_CHESS_START  = {
             {"♜","♞","♝","♛","♚","♝","♞","♜"},
             {"♟","♟","♟","♟","♟","♟","♟","♟"},
             {" "," "," "," "," "," "," "," "},
@@ -22,8 +22,8 @@ public class RenderBoard {
             {"♖","♘","♗","♕","♔","♗","♘","♖"}
     };
 
-    private static final String[][] BLACK_CHESS_START = {
-            {"♖","♘","♗","♕","♔","♗","♘","♖"},
+    private static final String[][] BLACK_CHESS_START= {
+            {"♖","♘","♗","♔","♕","♗","♘","♖"},
             {"♙","♙","♙","♙","♙","♙","♙","♙"},
             {" "," "," "," "," "," "," "," "},
             {" "," "," "," "," "," "," "," "},
@@ -55,11 +55,11 @@ public class RenderBoard {
         String blackHeader = "    h  g  f  e  d  c  b  a    ";
 
 
-        if (teamColor == "WHITE"){
+        if (teamColor.equalsIgnoreCase("WHITE")){
             drawHeader(out, whiteHeader);
             drawChessBoard(out, "w");
             drawHeader(out, whiteHeader);
-        } else {
+        } else if (teamColor.equalsIgnoreCase("BLACK")) {
         drawHeader(out, blackHeader);
         drawChessBoard(out, "b");
         drawHeader(out, blackHeader);}
@@ -84,7 +84,7 @@ public class RenderBoard {
             // Left-side number (8 down to 1)
             out.print(SET_BG_COLOR_BLACK);
             out.print(SET_TEXT_COLOR_WHITE);
-            if (color == "w"){
+            if (Objects.equals(color, "w")){
                 out.print(" " + (8 - boardRow) + " ");
             } else {
                 out.print(" " + (boardRow + 1) + " ");
@@ -93,15 +93,15 @@ public class RenderBoard {
             // Draw the 8 columns
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                 boolean isWhiteSquare;
-                if (color == "w"){isWhiteSquare = (boardRow + boardCol) % 2 != 0;
-                } else{isWhiteSquare = (boardRow + boardCol) % 2 == 0;}
+                isWhiteSquare = (boardRow + boardCol) % 2 == 0;
+                setWhite(out);
 
 
                 if (isWhiteSquare){setWhite(out);}
                 else {setBlue(out);}
 
 
-                if (color == "w"){
+                if (Objects.equals(color, "w")){
                     out.print(" " + WHITE_CHESS_START[boardRow][boardCol] + " ");
                 } else{
                     out.print(" " + BLACK_CHESS_START[boardRow][boardCol] + " ");
