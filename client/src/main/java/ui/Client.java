@@ -14,6 +14,8 @@ public class Client {
     Boolean inGame;
     Boolean observing;
     AuthData authData;
+    RenderBoard renderBoard = new RenderBoard();
+    String teamColor;
 
     private final Map<String, Integer> letters = Map.of(
             "a" , 1,
@@ -35,16 +37,23 @@ public class Client {
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        label:
         while (true) {
             if (inGame) {
-                if (!handleInGame(scanner)){ break label;}
+                if (!handleInGame(scanner)) {
+                    break;
+                }
             } else if (observing) {
-                if (!handleObserving(scanner)){ break label;}
+                if (!handleObserving(scanner)) {
+                    break;
+                }
             } else if (loggedIn) {
-                if (!handleLoggedIn(scanner)){ break label;}
+                if (!handleLoggedIn(scanner)) {
+                    break;
+                }
             } else {
-                if (!handleLoggedOut(scanner)){ break label;}
+                if (!handleLoggedOut(scanner)) {
+                    break;
+                }
             }
         }
     }
@@ -57,8 +66,18 @@ public class Client {
 
         switch (command) {
             case "menu" -> inGame = false;
-            case "quit" -> { return false; }
+            case "quit" -> {return false;}
+            case "redraw" -> redraw(tokens);
+            case "leave" -> inGame = false;
+            case "make" -> move(tokens);
+            case "resign" -> {}
+            case "highlight" -> {}
             default -> System.out.println("""
+                    redraw - redraws board
+                    leave - lets you leave the game
+                    make move - makes a move
+                    resign - removes you from current game then leaves
+                    highlight moves - shows possible moves
                     menu - return to login state
                     quit - to exit
                     help - see options""");
@@ -150,10 +169,11 @@ public class Client {
                 authData = server.login(username, password);
                 loggedIn = true;
             } catch (Exception ex) {
-                switch (ex.getMessage().toString()){
-                        case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("Username doesn't exist");
-                        default -> System.out.println("internal server error");
-                    }
+                if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                    System.out.println("Username doesn't exist");
+                } else {
+                    System.out.println("internal server error");
+                }
             }
         }
     }
@@ -176,9 +196,10 @@ public class Client {
                 Map<String, Integer> gameId = server.createGame(authData.authToken(), gameName);
                 System.out.printf("%s id is %s %n", gameName, gameId.get("gameID"));
             } catch (Exception ex) {
-                switch (ex.getMessage()){
-                    case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
-                    default -> System.out.println("internal server error");
+                if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                    System.out.println("you aren't authorized");
+                } else {
+                    System.out.println("internal server error");
                 }
             }
         }
@@ -198,9 +219,10 @@ public class Client {
             }
 
         } catch (Exception ex) {
-            switch (ex.getMessage()){
-                case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
-                default -> System.out.println("internal server error");
+            if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                System.out.println("you aren't authorized");
+            } else {
+                System.out.println("internal server error");
             }
         }
         }
@@ -213,14 +235,14 @@ public class Client {
             System.out.println("Invalid argument. Usage: play game <ID> [WHITE|BLACK]");
         } else {
             int id = Integer.parseInt(tokens[1]);
+            teamColor = tokens[2].toUpperCase();
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
             try {
                 server.joinGame(authData.authToken(), id, color);
-                RenderBoard renderBoard = new RenderBoard();
                 renderBoard.render(tokens[2]);
                 inGame = true;
             } catch (Exception ex) {
-                switch (ex.getMessage().toString()){
+                switch (ex.getMessage()){
                     case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
                     case "body exception: {\"message\":\"Error: team already has player\"}" -> System.out.println("team already has player");
                     default -> System.out.println("internal server error");
@@ -235,15 +257,26 @@ public class Client {
         } else{
             int id = Integer.parseInt(tokens[1]);
             try{
-                RenderBoard renderBoard = new RenderBoard();
                 renderBoard.render("WHITE");
                 observing = true;
             } catch (Exception ex) {
-                switch (ex.getMessage()){
-                    case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
-                    default -> System.out.println("internal server error");
+                if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                    System.out.println("you aren't authorized");
+                } else {
+                    System.out.println("internal server error");
                 }
             }
         }
     }
+    private void redraw(String[] tokens){
+        if (tokens.length != 1){
+            System.out.println("Invalid number of arguments. Usage: redraw ");
+        } else {
+            renderBoard.render(teamColor);
+        }
+    }
+    private void move(String[] tokens){
+        System.out.println("play");
+    }
+
 }
