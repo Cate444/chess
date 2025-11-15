@@ -1,21 +1,27 @@
-package ui;
+package backend;
 
 import java.util.*;
 
 import chess.ChessGame;
 import datamodel.AuthData;
+import datamodel.GameData;
 import datamodel.ReturnGameData;
 import server.ServerFacade;
+import ui.RenderBoard;
+import websocket.messages.ServerMessage;
 
-public class Client {
-    ServerFacade server;
+public class Client implements ServerMessageObserver{
+    private ServerFacade server;
+    private WebSocketFacade ws;
+    private ServerMessageObserver serverMessageObserver;
 
-    Boolean loggedIn;
-    Boolean inGame;
-    Boolean observing;
-    AuthData authData;
-    RenderBoard renderBoard = new RenderBoard();
-    String teamColor;
+    private Boolean loggedIn;
+    private Boolean inGame;
+    private Boolean observing;
+    private AuthData authData;
+    private RenderBoard renderBoard = new RenderBoard();
+    private String teamColor;
+    private String serverURL;
 
     private final Map<String, Integer> letters = Map.of(
             "a" , 1,
@@ -28,11 +34,17 @@ public class Client {
             "h", 8
     );
 
-    public Client(String serverUrl) {
+    public Client(String serverUrl) throws Exception {
        loggedIn = false;
        inGame = false;
        observing = false;
+       serverURL = serverUrl;
        server = new ServerFacade(serverUrl);
+       ws = new WebSocketFacade(serverUrl, this);
+    }
+    @Override
+    public void notify(ServerMessage message){
+        System.out.println(message.toString());
     }
 
     public void run() {
@@ -257,6 +269,7 @@ public class Client {
         } else{
             int id = Integer.parseInt(tokens[1]);
             try{
+                ws.observeGame(id, authData.authToken());
                 renderBoard.render("WHITE");
                 observing = true;
             } catch (Exception ex) {

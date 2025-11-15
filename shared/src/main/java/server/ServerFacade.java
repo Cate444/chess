@@ -106,14 +106,12 @@ public class ServerFacade {
             if (body != null) {
                 throw new Exception("body exception: "+ body);
             }
-
             throw new Exception("other failure: " + status);
         }
 
         if (responseType != null) {
             return new Gson().fromJson(response.body(), responseType);
         }
-
         return null;
     }
 

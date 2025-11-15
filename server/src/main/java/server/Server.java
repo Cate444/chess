@@ -6,6 +6,7 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 
 import datamodel.*;
+import server.websocket.WebSocketHandler;
 import service.GameService;
 import service.UserService;
 
@@ -17,8 +18,11 @@ public class Server {
     private final UserService userService;
     private final GameService gameService;
     private final Gson gson = new Gson();
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
+        webSocketHandler = new WebSocketHandler();
+
         UserDataAccess userDataAccess;
         GameDataAccess gameDataAccess;
         try {
@@ -43,6 +47,11 @@ public class Server {
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::join);
+        server.ws("ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                });
     }
 
 
