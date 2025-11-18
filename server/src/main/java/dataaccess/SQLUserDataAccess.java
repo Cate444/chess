@@ -103,8 +103,6 @@ public class SQLUserDataAccess implements UserDataAccess{
                     throw new DataAccessException("unauthorized");
                 }
             }
-
-
             String insertUser = "INSERT INTO authTable(username, authToken) " +
                     "VALUES(?, ?)";
             try (var preparedStatement = conn.prepareStatement(insertUser)) {
@@ -155,5 +153,23 @@ public class SQLUserDataAccess implements UserDataAccess{
             throw ex;
         }
         return authToken;
+    }
+
+    @Override
+    public String getUser(String authToken) throws Exception{
+        try (Connection conn = DatabaseManager.getConnection()){
+            String selectAuth = "SELECT username FROM authTable WHERE authToken = ?";
+            try (var preparedStatement = conn.prepareStatement(selectAuth)) {
+                preparedStatement.setString(1, authToken);
+                ResultSet rs = preparedStatement.executeQuery();
+                if (!rs.next()) {
+                    throw new Exception("unauthorized");
+                }
+                String username = rs.getString("username");
+                return username;
+            }
+        }catch (Exception ex){
+            throw ex;
+        }
     }
 }

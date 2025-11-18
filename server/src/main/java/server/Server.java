@@ -20,7 +20,7 @@ public class Server {
     private final Gson gson = new Gson();
     private final WebSocketHandler webSocketHandler;
 
-    public Server() {
+    public Server() throws  Exception{
         webSocketHandler = new WebSocketHandler();
 
         UserDataAccess userDataAccess;

@@ -1,17 +1,33 @@
 package server.websocket;
 
 import com.google.gson.Gson;
+import dataaccess.GameDataAccess;
+import dataaccess.SQLGameDataAccess;
+import dataaccess.SQLUserDataAccess;
+import dataaccess.UserDataAccess;
+import datamodel.GameName;
+import datamodel.JoinInfo;
+import datamodel.ReturnGameData;
+import datamodel.UserData;
 import io.javalin.websocket.*;
+import org.junit.jupiter.api.function.Executable;
 import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.management.Notification;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    private final UserDataAccess userDataAccess = new SQLUserDataAccess();
+    private final GameDataAccess gameDataAccess = new SQLGameDataAccess();
+
+    public WebSocketHandler() throws Exception {
+    }
 
     @Override
     public void handleConnect(WsConnectContext ctx) {
@@ -41,11 +57,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(Session session, UserGameCommand userGameCommand) throws IOException {
+    private void connect(Session session, UserGameCommand userGameCommand) throws Exception {
         connections.add(session);
         System.out.println("YOU USED THE WEBSOCKET");
         userGameCommand.getGameID();
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        userGameCommand.getAuthToken();
+        String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+        String notificationString = String.format("%s is observing game %s", username, userGameCommand.getGameID());
+        var notification = new NotificationMessage(notificationString);
         connections.broadcast(session, notification);
     }
     private void makeMove(){}

@@ -23,8 +23,10 @@ public class MemoryUserDataAccess implements UserDataAccess {
         }
     }
 
-
-
+    @Override
+    public String getUser(String authToken) throws Exception{
+        return authTokenUserMap.get(authToken);
+    }
 
     @Override
     public String createAuthToken(UserData userData){

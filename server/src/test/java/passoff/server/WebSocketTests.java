@@ -31,8 +31,12 @@ public class WebSocketTests {
     }
 
     @BeforeAll
-    public static void init() throws URISyntaxException {
-        server = new Server();
+    public static void init() throws Exception {
+        try{
+            server = new Server();
+        } catch (Exception ex){
+            throw ex;
+        }
         var port = Integer.toString(server.run(0));
         System.out.println("Started test HTTP server on " + port);
 

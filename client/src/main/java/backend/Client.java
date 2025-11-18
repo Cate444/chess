@@ -8,6 +8,7 @@ import datamodel.GameData;
 import datamodel.ReturnGameData;
 import server.ServerFacade;
 import ui.RenderBoard;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 public class Client implements ServerMessageObserver{
@@ -44,7 +45,13 @@ public class Client implements ServerMessageObserver{
     }
     @Override
     public void notify(ServerMessage message){
-        System.out.println(message.toString());
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
+            NotificationMessage notificationMessage = (NotificationMessage) message;
+            String aMessage = notificationMessage.message;
+            System.out.println(notificationMessage.message);
+        } else {
+            System.out.println(message.toString());
+        }
     }
 
     public void run() {
