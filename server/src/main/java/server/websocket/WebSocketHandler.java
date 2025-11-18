@@ -42,7 +42,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(ctx.session, userGameCommand);
-               //case CONNECT -> handleConnect(ctx);
                 case MAKE_MOVE -> makeMove();
                 case LEAVE -> leave();
                 case RESIGN -> resign();
@@ -60,10 +59,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(Session session, UserGameCommand userGameCommand) throws Exception {
         connections.add(session);
         System.out.println("YOU USED THE WEBSOCKET");
-        userGameCommand.getGameID();
-        userGameCommand.getAuthToken();
         String username = userDataAccess.getUser(userGameCommand.getAuthToken());
-        String notificationString = String.format("%s is observing game %s", username, userGameCommand.getGameID());
+        String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
+        String notificationString = String.format("%s is observing game %s", username, gameName);
         var notification = new NotificationMessage(notificationString);
         connections.broadcast(session, notification);
     }

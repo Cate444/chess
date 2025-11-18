@@ -12,4 +12,5 @@ public interface GameDataAccess {
     int createGame(GameName gameName) throws Exception;
     void join(JoinInfo joinInfo, String username) throws Exception;
     ArrayList<ReturnGameData> listGames() throws Exception;
+    String getGameName(int gameID) throws Exception;
 }

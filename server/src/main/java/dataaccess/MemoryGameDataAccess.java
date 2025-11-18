@@ -64,4 +64,14 @@ public class MemoryGameDataAccess implements GameDataAccess {
         }
         return newGameList;
     }
+
+    @Override
+    public String getGameName(int gameID){
+        for (GameData game : gameList) {
+            if (game.gameID() == gameID) {
+                return game.gameName();
+            }
+        }
+        return null;
+    }
 }

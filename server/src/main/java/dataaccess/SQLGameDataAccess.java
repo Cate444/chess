@@ -168,4 +168,23 @@ public class SQLGameDataAccess implements GameDataAccess {
         }
         return returnList;
     }
+
+    public String getGameName(int gameID) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()){
+            String selectGameName = "SELECT gameName FROM gameTable WHERE gameID = ?";
+            try (var preparedStatement = conn.prepareStatement(selectGameName)) {
+                preparedStatement.setInt(1, gameID);
+                ResultSet rs = preparedStatement.executeQuery();
+                if (!rs.next()) {
+                    throw new Exception("unauthorized");
+                }
+                String gameName = rs.getString("gameName");
+                return gameName;
+            }
+            }catch (Exception ex){
+            throw ex;
+        }
+    }
+
+
 }
