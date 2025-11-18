@@ -5,20 +5,11 @@ import dataaccess.GameDataAccess;
 import dataaccess.SQLGameDataAccess;
 import dataaccess.SQLUserDataAccess;
 import dataaccess.UserDataAccess;
-import datamodel.GameName;
-import datamodel.JoinInfo;
-import datamodel.ReturnGameData;
-import datamodel.UserData;
 import io.javalin.websocket.*;
-import org.junit.jupiter.api.function.Executable;
 import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
-import javax.management.Notification;
-import java.io.IOException;
-import java.util.ArrayList;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -37,7 +28,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(WsMessageContext ctx) {
-       //this never calls handleConnect which allow pings so you need figure out why and where that should be called
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (userGameCommand.getCommandType()) {
@@ -58,11 +48,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(Session session, UserGameCommand userGameCommand) throws Exception {
         connections.add(session);
-        System.out.println("YOU USED THE WEBSOCKET");
         String username = userDataAccess.getUser(userGameCommand.getAuthToken());
         String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
         String notificationString = String.format("%s is observing game %s", username, gameName);
         var notification = new NotificationMessage(notificationString);
+       // System.out.printf("printing to d% connections", connections.size());
         connections.broadcast(session, notification);
     }
     private void makeMove(){}
