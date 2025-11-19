@@ -47,13 +47,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(Session session, UserGameCommand userGameCommand) throws Exception {
-        connections.add(session);
+        connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
         String username = userDataAccess.getUser(userGameCommand.getAuthToken());
         String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
         String notificationString = String.format("%s is observing game %s", username, gameName);
         var notification = new NotificationMessage(notificationString);
-       // System.out.printf("printing to d% connections", connections.size());
-        connections.broadcast(session, notification);
+        connections.broadcast(session, notification, userGameCommand.getGameID());
     }
     private void makeMove(){}
     private void leave(){}
