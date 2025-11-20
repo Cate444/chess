@@ -27,6 +27,13 @@ public class ConnectionManager {
          }
     }
 
+    public void remove(Session session, String authToken, Integer gameID) {
+        HashSet<String> authTokenSet = (HashSet<String>) gameIDtoAuthTokens.get(gameID);
+        authTokenSet.remove(authToken);
+        gameIDtoAuthTokens.put(gameID, authTokenSet);
+        connections.remove(authToken);
+    }
+
     public void remove(Session session) {
         connections.remove(session);
     }
@@ -39,17 +46,16 @@ public class ConnectionManager {
         HashSet<String> authTokenSet = (HashSet<String>) gameIDtoAuthTokens.get(gameID);
         Gson gson = new Gson();
         String msg = gson.toJson(notification);
-        for (String goodAuthToken: authTokenSet){
-            Session c = connections.get(goodAuthToken);
-            if (c.isOpen()) {
-               // if (!c.equals(excludeSession)) {
+        if (authTokenSet.size() != 0) {
+            for (String goodAuthToken : authTokenSet) {
+                Session c = connections.get(goodAuthToken);
+                if (c.isOpen()) {
+                    // if (!c.equals(excludeSession)) {
                     c.getRemote().sendString(msg);
-                //}
+                    //}
+                }
             }
         }
-        //why is this only getting one thing in each map
-        //HELP!!
-
     }
 }
 

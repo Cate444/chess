@@ -33,7 +33,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(ctx.session, userGameCommand);
                 case MAKE_MOVE -> makeMove();
-                case LEAVE -> leave();
+                case LEAVE -> leave(ctx.session, userGameCommand);
                 case RESIGN -> resign();
             }
         } catch (Exception ex) {
@@ -55,7 +55,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, notification, userGameCommand.getGameID());
     }
     private void makeMove(){}
-    private void leave(){}
+    private void leave(Session session, UserGameCommand userGameCommand) throws Exception{
+        connections.remove(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
+
+        //connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
+        String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+        String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
+        String notificationString = String.format("%s left game %s", username, gameName);
+        var notification = new NotificationMessage(notificationString);
+        connections.broadcast(session, notification, userGameCommand.getGameID());
+    }
+
     private void resign(){}
 
 }

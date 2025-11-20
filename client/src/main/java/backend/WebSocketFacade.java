@@ -34,8 +34,9 @@ public class WebSocketFacade extends Endpoint {
                     switch (notification.getServerMessageType()) {
                         case NOTIFICATION :
                             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-                            System.out.print("\n");
-                            System.out.println(notificationMessage.message);
+//                            System.out.print("\n");
+//                            System.out.println(notificationMessage.message);
+                            serverMessageObserver.notifyNotification(notificationMessage);
 //                        case ERROR -> ;
 //                        case LOAD_GAME -> ;
                     }
@@ -55,6 +56,16 @@ public class WebSocketFacade extends Endpoint {
     public void observeGame(int gameID, String authToken) throws IOException {
         try {
             var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    public void leave(int gameID, String authToken) throws IOException{
+        try {
+            // this fucntion throws an error
+            var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
         } catch (Exception ex) {
             throw ex;

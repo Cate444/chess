@@ -23,6 +23,7 @@ public class Client implements ServerMessageObserver{
     private RenderBoard renderBoard = new RenderBoard();
     private String teamColor;
     private String serverURL;
+    int gameInvolvedIn;
 
     private final Map<String, Integer> letters = Map.of(
             "a" , 1,
@@ -46,9 +47,19 @@ public class Client implements ServerMessageObserver{
     @Override
     public void notify(ServerMessage message){
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
+            //it breaks on this line
             NotificationMessage notificationMessage = (NotificationMessage) message;
             String aMessage = notificationMessage.message;
             System.out.println(notificationMessage.message);
+        } else {
+            System.out.println(message.toString());
+        }
+    }
+
+    public void notifyNotification(NotificationMessage message){
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
+            //String aMessage = message.message;
+            System.out.println(message.message);
         } else {
             System.out.println(message.toString());
         }
@@ -87,7 +98,7 @@ public class Client implements ServerMessageObserver{
             case "menu" -> inGame = false;
             case "quit" -> {return false;}
             case "redraw" -> redraw(tokens);
-            case "leave" -> inGame = false;
+            case "leave" -> leave(tokens);
             case "make" -> move(tokens);
             case "resign" -> {}
             case "highlight" -> {}
@@ -112,7 +123,9 @@ public class Client implements ServerMessageObserver{
         switch (command) {
             case "menu" -> observing = false;
             case "quit" -> { return false; }
+            case "leave" -> leave(tokens);
             default -> System.out.println("""
+                leave - lets you leave the game
                 menu - return to login state
                 quit - to exit
                 help - see options""");
@@ -260,11 +273,31 @@ public class Client implements ServerMessageObserver{
                 server.joinGame(authData.authToken(), id, color);
                 renderBoard.render(tokens[2]);
                 inGame = true;
+                gameInvolvedIn = id;
             } catch (Exception ex) {
                 switch (ex.getMessage()){
                     case "body exception: {\"message\":\"Error: unauthorized\"}" -> System.out.println("you aren't authorized");
                     case "body exception: {\"message\":\"Error: team already has player\"}" -> System.out.println("team already has player");
                     default -> System.out.println("internal server error");
+                }
+            }
+        }
+    }
+
+    private void leave(String[] tokens){
+        if (tokens.length != 1){
+            System.out.println("Invalid number of arguments. Usage: leave ");
+        } else{
+            try{
+                ws.leave(gameInvolvedIn, authData.authToken());
+                observing = false;
+                inGame = false;
+                gameInvolvedIn = 0;
+            } catch (Exception ex) {
+                if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                    System.out.println("you aren't authorized");
+                } else {
+                    System.out.println("internal server error");
                 }
             }
         }
@@ -279,6 +312,7 @@ public class Client implements ServerMessageObserver{
                 ws.observeGame(id, authData.authToken());
                 renderBoard.render("WHITE");
                 observing = true;
+                gameInvolvedIn = id;
             } catch (Exception ex) {
                 if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
                     System.out.println("you aren't authorized");
