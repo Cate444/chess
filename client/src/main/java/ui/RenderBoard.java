@@ -111,7 +111,11 @@ public class RenderBoard {
             // Right-side number
             out.print(SET_BG_COLOR_BLACK);
             out.print(SET_TEXT_COLOR_WHITE);
-            out.print(" " + (8 - boardRow) + " ");
+            if (Objects.equals(color, "w")){
+                out.print(" " + (8 - boardRow) + " ");
+            } else {
+                out.print(" " + (boardRow + 1) + " ");
+            }
 
             // ✅ Reset background and text to white after the row ends
             out.print(RESET_BG_COLOR);

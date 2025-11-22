@@ -50,9 +50,9 @@ public class ConnectionManager {
             for (String goodAuthToken : authTokenSet) {
                 Session c = connections.get(goodAuthToken);
                 if (c.isOpen()) {
-                    // if (!c.equals(excludeSession)) {
+                    if (!c.equals(excludeSession)) {
                     c.getRemote().sendString(msg);
-                    //}
+                    }
                 }
             }
         }

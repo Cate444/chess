@@ -5,7 +5,6 @@ import datamodel.GameData;
 import datamodel.GameName;
 import datamodel.JoinInfo;
 import datamodel.ReturnGameData;
-import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
 
@@ -66,6 +65,11 @@ public class MemoryGameDataAccess implements GameDataAccess {
     }
 
     @Override
+    public ArrayList<GameData> listGamesWithGameInfo() throws Exception{
+        return gameList;
+    }
+
+    @Override
     public String getGameName(int gameID){
         for (GameData game : gameList) {
             if (game.gameID() == gameID) {
@@ -73,5 +77,15 @@ public class MemoryGameDataAccess implements GameDataAccess {
             }
         }
         return null;
+    }
+
+    @Override
+    public void updateGameData(int gameID, ChessGame chessGame) throws Exception {
+        for (GameData game: gameList){
+          if (gameID == game.gameID()){
+              gameList.remove(game);
+              gameList.add(new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame));
+          }
+        }
     }
 }

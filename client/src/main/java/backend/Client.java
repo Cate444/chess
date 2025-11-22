@@ -3,6 +3,9 @@ package backend;
 import java.util.*;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import datamodel.AuthData;
 import datamodel.GameData;
 import datamodel.ReturnGameData;
@@ -25,15 +28,26 @@ public class Client implements ServerMessageObserver{
     private String serverURL;
     int gameInvolvedIn;
 
-    private final Map<String, Integer> letters = Map.of(
-            "a" , 1,
-            "b", 2,
-            "c", 3,
-            "d", 4,
-            "e", 5,
-            "f", 6,
-            "g", 7,
-            "h", 8
+    private final Map<Character, Integer> letters = Map.of(
+            'a' , 1,
+            'b', 2,
+            'c', 3,
+            'd', 4,
+            'e', 5,
+            'f', 6,
+            'g', 7,
+            'h', 8
+    );
+
+    private final Map<Character, Integer> numbers = Map.of(
+            '1' , 1,
+            '2', 2,
+            '3', 3,
+            '4', 4,
+            '5', 5,
+            '6', 6,
+            '7', 7,
+            '8', 8
     );
 
     public Client(String serverUrl) throws Exception {
@@ -99,13 +113,13 @@ public class Client implements ServerMessageObserver{
             case "quit" -> {return false;}
             case "redraw" -> redraw(tokens);
             case "leave" -> leave(tokens);
-            case "make" -> move(tokens);
+            case "move" -> move(tokens);
             case "resign" -> {}
             case "highlight" -> {}
             default -> System.out.println("""
                     redraw - redraws board
                     leave - lets you leave the game
-                    make move - makes a move
+                    move - starts process of making move you'll be asked from where to where
                     resign - removes you from current game then leaves
                     highlight moves - shows possible moves
                     menu - return to login state
@@ -262,15 +276,16 @@ public class Client implements ServerMessageObserver{
 
     private void playGame(String[] tokens){
         if (tokens.length != 3){
-            System.out.println("Invalid number of arguments. Usage: play game <ID> [WHITE|BLACK]");
+            System.out.println("Invalid number of arguments. Usage: play <ID> [WHITE|BLACK]");
         } else if (!(Objects.equals(tokens[2].toUpperCase(), "WHITE") | Objects.equals(tokens[2].toUpperCase(), "BLACK"))){
-            System.out.println("Invalid argument. Usage: play game <ID> [WHITE|BLACK]");
+            System.out.println("Invalid argument. Usage: play <ID> [WHITE|BLACK]");
         } else {
             int id = Integer.parseInt(tokens[1]);
             teamColor = tokens[2].toUpperCase();
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
             try {
                 server.joinGame(authData.authToken(), id, color);
+                ws.joinGame(authData.authToken(), id, color);
                 renderBoard.render(tokens[2]);
                 inGame = true;
                 gameInvolvedIn = id;
@@ -330,7 +345,72 @@ public class Client implements ServerMessageObserver{
         }
     }
     private void move(String[] tokens){
-        System.out.println("play");
+        if (tokens.length != 1){
+            System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
+        } else{
+            System.out.println("Please input colum then row ex. e5");
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("from: ");
+            String fromPosition = scanner.nextLine().strip();
+            System.out.print("to : ");
+            String toPosition = scanner.nextLine().strip();
+            ChessMove chessMove = convert(fromPosition, toPosition);
+            try{
+                ws.move(chessMove, gameInvolvedIn, authData.authToken());
+
+                //renderBoard.render("WHITE");
+                //observing = true;
+            } catch (Exception ex) {
+                if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                    System.out.println("you aren't authorized");
+                } else {
+                    System.out.println("internal server error");
+                }
+            }
+        }
+    }
+
+    private ChessMove convert(String fromPosition, String toPosition){
+        // trim & basic validation
+        if (fromPosition == null || toPosition == null) {
+            throw new IllegalArgumentException("positions cannot be null");
+        }
+        fromPosition = fromPosition.strip();
+        toPosition   = toPosition.strip();
+
+        if (fromPosition.length() < 2 || toPosition.length() < 2) {
+            throw new IllegalArgumentException("positions must be like \"a2\"");
+        }
+
+        // letter is column (a-h), number is row (1-8)
+        char fromColChar = Character.toLowerCase(fromPosition.charAt(0)); // 'a'
+        char fromRowChar = fromPosition.charAt(1);                        // '2'
+        char toColChar   = Character.toLowerCase(toPosition.charAt(0));   // 'a'
+        char toRowChar   = toPosition.charAt(1);                          // '3'
+
+        Integer fromCol = letters.get(fromColChar); // letters: a->1
+        Integer fromRow = numbers.get(fromRowChar); // numbers: '2'->2
+        Integer toCol   = letters.get(toColChar);
+        Integer toRow   = numbers.get(toRowChar);
+
+        if (fromCol == null || fromRow == null || toCol == null || toRow == null) {
+            throw new IllegalArgumentException(
+                    "Invalid chess coordinates: '" + fromPosition + "' -> '" + toPosition + "'."
+            );
+        }
+
+        ChessPosition fromObj = new ChessPosition(fromRow, fromCol);
+        ChessPosition toObj   = new ChessPosition(toRow, toCol);
+
+        ChessPiece.PieceType pieceType = null;
+        // use equals to compare strings
+        if ((toRow == 8 && "WHITE".equals(teamColor)) || (toRow == 1 && "BLACK".equals(teamColor))){
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("What piece would you like to promote to: ");
+            pieceType = ChessPiece.PieceType.valueOf(scanner.nextLine().strip().toUpperCase());
+        }
+
+        return new ChessMove(fromObj, toObj, pieceType);
     }
 
 }

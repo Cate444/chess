@@ -1,9 +1,9 @@
 package dataaccess;
 
+import datamodel.GameData;
 import datamodel.GameName;
 import datamodel.JoinInfo;
 import datamodel.ReturnGameData;
-import org.junit.jupiter.api.function.Executable;
 import chess.ChessGame;
 import com.google.gson.Gson;
 
@@ -167,6 +167,56 @@ public class SQLGameDataAccess implements GameDataAccess {
             throw ex;
         }
         return returnList;
+    }
+
+    @Override
+    public ArrayList<GameData> listGamesWithGameInfo() throws Exception {
+        ArrayList<GameData> returnList = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String getGames = "SELECT * FROM gameTable";
+            try (var preparedStatement = conn.prepareStatement(getGames)) {
+                ResultSet rs = preparedStatement.executeQuery();
+                while(rs.next()){
+                    int gameID = rs.getInt("gameID");
+                    String gameName = rs.getString("gameName");
+                    String game = rs.getString("game");
+                    ChessGame gameData = new Gson().fromJson(game, ChessGame.class);
+                    String whiteUsername;
+                    String blackUsername;
+
+                    if (rs.getString("whiteUsername") != null){
+                        whiteUsername = rs.getString("whiteUsername");
+                    } else {
+                        whiteUsername = null;
+                    }
+                    if (rs.getString("blackUsername") != null){
+                        blackUsername = rs.getString("blackUsername");
+                    } else {
+                        blackUsername = null;
+                    }
+
+                    returnList.add(new GameData(gameID,whiteUsername, blackUsername,gameName, gameData));
+                }
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+        return returnList;
+    }
+
+    @Override
+    public void updateGameData(int gameID, ChessGame chessGame) throws Exception {
+        try(Connection conn = DatabaseManager.getConnection()) {
+            String updateGame = "UPDATE gameTable SET game = ? WHERE gameID = ?";
+            String gameData = new Gson().toJson(chessGame);
+            try (var preparedStatement = conn.prepareStatement(updateGame)) {
+                preparedStatement.setString(1, gameData);
+                preparedStatement.setInt(2, gameID);
+                preparedStatement.executeUpdate();
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     public String getGameName(int gameID) throws Exception {
