@@ -73,7 +73,8 @@ public class WebSocketFacade extends Endpoint {
     }
 
     private String transform(ChessBoard chessBoard){
-
+        //map pieces to board then make a set for the render function
+        return "";
     }
 
     public void joinGame(String authToken, int gameID, ChessGame.TeamColor color) throws Exception{

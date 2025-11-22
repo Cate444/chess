@@ -39,7 +39,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (userGameCommand.getCommandType()) {
-                case CONNECT -> observe(ctx);
+                case CONNECT -> connect(ctx);
                 case OBSERVE -> observe(ctx);
                 case MAKE_MOVE -> makeMove(ctx);
                 case LEAVE -> leave(ctx);
@@ -58,14 +58,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(WsMessageContext ctx) throws Exception{
         Session session = ctx.session;
         JoinGameCommand joinGameCommand = new Gson().fromJson(ctx.message(), JoinGameCommand.class);
-        //breaks on here
-        connections.add(session, joinGameCommand.getAuthToken(), joinGameCommand.getGameID());
-        String username = userDataAccess.getUser(joinGameCommand.getAuthToken());
-        String gameName = gameDataAccess.getGameName(joinGameCommand.getGameID().intValue());
+        UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
+        String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+        String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
         String color = joinGameCommand.teamColor.toString();
         String notificationString = String.format("%s is playing game %s as %s", username, gameName, color);
         var notification = new NotificationMessage(notificationString);
-        connections.broadcast(session, notification, joinGameCommand.getGameID());
+        connections.broadcast(session, notification, userGameCommand.getGameID());
     }
 
     private void observe(WsMessageContext ctx) throws Exception {
