@@ -51,7 +51,7 @@ public class ConnectionManager {
                 Session c = connections.get(goodAuthToken);
                 if (c.isOpen()) {
                     if (!c.equals(excludeSession)) {
-                    c.getRemote().sendString(msg);
+                        c.getRemote().sendString(msg);
                     }
                 }
             }

@@ -1,8 +1,7 @@
 package backend;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
+import chess.*;
+import chess.ChessPiece.PieceType;
 import com.google.gson.Gson;
 
 
@@ -40,14 +39,13 @@ public class WebSocketFacade extends Endpoint {
                     switch (notification.getServerMessageType()) {
                         case NOTIFICATION :
                             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-//                            System.out.print("\n");
-//                            System.out.println(notificationMessage.message);
                             serverMessageObserver.notifyNotification(notificationMessage);
 //                        case ERROR -> ;
                         case LOAD_GAME :
                             LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
                             ChessBoard chessBoard = loadGameMessage.gameBoard();
-                            String board = transform(chessBoard);
+//                            String[][] board = transform(chessBoard);
+//                            System.out.println(board);
                             System.out.println(chessBoard.toString());
                     }
                     serverMessageObserver.notify(notification);
@@ -72,15 +70,41 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    private String transform(ChessBoard chessBoard){
+    private String[][] transform(ChessBoard chessBoard){
         //map pieces to board then make a set for the render function
-        return "";
+        String[][] board = new String[8][8];
+        for(int i= 1; i <=8; i++){
+            String[] row = new String[8];
+            for (int j=1; i <=8; i++){
+               chess.ChessPiece piece = chessBoard.getPiece(new ChessPosition(j, i));
+               if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                   switch (piece.getPieceType()){
+                       case ROOK -> row[j] = String.valueOf("♖");
+                       case KNIGHT -> row[j] = String.valueOf("♘");
+                       case BISHOP -> row[j] = String.valueOf("♗");
+                       case QUEEN -> row[j] = String.valueOf("♔");
+                       case KING -> row[j] = String.valueOf("♕");
+                       case PAWN -> row[j] = String.valueOf("♙");
+                   }
+               } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                   switch (piece.getPieceType()){
+                       case ROOK -> row[j] = String.valueOf("♜");
+                       case KNIGHT -> row[j] = String.valueOf("♞");
+                       case BISHOP -> row[j] = String.valueOf("♝");
+                       case QUEEN -> row[j] = String.valueOf("♚");
+                       case KING -> row[j] = String.valueOf("♛");
+                       case PAWN -> row[j] = String.valueOf("♟");
+                   }
+               }
+            }
+            board[i] = row;
+        }
+        return board;
     }
 
     public void joinGame(String authToken, int gameID, ChessGame.TeamColor color) throws Exception{
         try {
             var joinGameCommand = new JoinGameCommand(authToken, gameID, color);
-            //var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(joinGameCommand));
         } catch (Exception ex) {
             throw ex;
