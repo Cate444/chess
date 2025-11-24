@@ -33,37 +33,43 @@ public class RenderBoard {
             {"♜","♞","♝","♚","♛","♝","♞","♜"}
     };
 
-    public static void main(String[] args) {
-        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        String blackHeader = "    h  g  f  e  d  c  b  a    ";
+//    public static void main(String[] args) {
+//        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+//        String blackHeader = "    h  g  f  e  d  c  b  a    ";
+//
+//        out.print(ERASE_SCREEN);
+//        out.print(SET_TEXT_COLOR_WHITE);
+//
+//        drawHeader(out, blackHeader);
+//        drawChessBoard(out, "b");
+//        drawHeader(out, blackHeader);
+//
+//        // Reset color at the very end
+//        out.print(RESET_BG_COLOR);
+//        out.print(SET_TEXT_COLOR_WHITE);
+//    }
 
-        out.print(ERASE_SCREEN);
-        out.print(SET_TEXT_COLOR_WHITE);
-
-        drawHeader(out, blackHeader);
-        drawChessBoard(out, "b");
-        drawHeader(out, blackHeader);
-
-        // Reset color at the very end
-        out.print(RESET_BG_COLOR);
-        out.print(SET_TEXT_COLOR_WHITE);
+    public void render(String teamColor) {
+        render(teamColor,BLACK_CHESS_START);
     }
 
-    public void render(String teamColor){
+    public void render(String teamColor, String[][] CHESS_START) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         String whiteHeader = "    a  b  c  d  e  f  g  h    ";
         String blackHeader = "    h  g  f  e  d  c  b  a    ";
 
-
-        if (teamColor.equalsIgnoreCase("WHITE")){
+        System.out.println("");
+        if (teamColor.equalsIgnoreCase("WHITE")) {
             drawHeader(out, whiteHeader);
-            drawChessBoard(out, "w");
+            drawChessBoard(out, "w", CHESS_START);
             drawHeader(out, whiteHeader);
         } else if (teamColor.equalsIgnoreCase("BLACK")) {
-        drawHeader(out, blackHeader);
-        drawChessBoard(out, "b");
-        drawHeader(out, blackHeader);}
+            drawHeader(out, blackHeader);
+            drawChessBoard(out, "b", CHESS_START);
+            drawHeader(out, blackHeader);
+        }
     }
+
 
     // Top and bottom column labels
     private static void drawHeader(PrintStream out, String headerString) {
@@ -78,7 +84,7 @@ public class RenderBoard {
 
 
     // Draws 8x8 board with row numbers and color reset after each line
-    private static void drawChessBoard(PrintStream out, String color) {
+    private static void drawChessBoard(PrintStream out, String color, String[][] CHESS_START) {
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
 
             // Left-side number (8 down to 1)
@@ -96,15 +102,13 @@ public class RenderBoard {
                 isWhiteSquare = (boardRow + boardCol) % 2 == 0;
                 setWhite(out);
 
-
                 if (isWhiteSquare){setWhite(out);}
                 else {setBlue(out);}
 
-
                 if (Objects.equals(color, "w")){
-                    out.print(" " + WHITE_CHESS_START[boardRow][boardCol] + " ");
+                    out.print(" " + CHESS_START[7-boardRow][7-boardCol] + " ");
                 } else{
-                    out.print(" " + BLACK_CHESS_START[boardRow][boardCol] + " ");
+                    out.print(" " + CHESS_START[boardRow][boardCol] + " ");
                 }
             }
 

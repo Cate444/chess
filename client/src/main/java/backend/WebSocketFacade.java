@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 
 
 import jakarta.websocket.*;
+import ui.RenderBoard;
 import websocket.commands.JoinGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
@@ -37,16 +38,10 @@ public class WebSocketFacade extends Endpoint {
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     switch (notification.getServerMessageType()) {
-                        case NOTIFICATION :
-                            NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-                            serverMessageObserver.notifyNotification(notificationMessage);
+                        case NOTIFICATION -> notificationMessage(message);
 //                        case ERROR -> ;
-                        case LOAD_GAME :
-                            LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-                            ChessBoard chessBoard = loadGameMessage.gameBoard();
-//                            String[][] board = transform(chessBoard);
-//                            System.out.println(board);
-                            System.out.println(chessBoard.toString());
+                        case LOAD_GAME -> loadGameMessage(message);
+                        default -> throw new IllegalStateException("Unexpected value: " + notification.getServerMessageType());
                     }
                     serverMessageObserver.notify(notification);
                 }
@@ -61,6 +56,27 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
+    private void notificationMessage(String message){
+        NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+        serverMessageObserver.notifyNotification(notificationMessage);
+    }
+
+    private void loadGameMessage(String message){
+        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+        ChessBoard chessBoard = loadGameMessage.gameBoard();
+        String[][] board = transform(chessBoard);
+        System.out.println("");
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                System.out.print(board[i][j]);
+            }
+            System.out.println("");
+        }
+
+        RenderBoard boardRender = new RenderBoard();
+        boardRender.render(loadGameMessage.getTeamColor().toString(), board);
+    }
+
     public void observeGame(int gameID, String authToken) throws IOException {
         try {
             var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.OBSERVE, authToken, gameID);
@@ -73,11 +89,13 @@ public class WebSocketFacade extends Endpoint {
     private String[][] transform(ChessBoard chessBoard){
         //map pieces to board then make a set for the render function
         String[][] board = new String[8][8];
-        for(int i= 1; i <=8; i++){
+        for(int i= 0; i <8; i++){
             String[] row = new String[8];
-            for (int j=1; i <=8; i++){
-               chess.ChessPiece piece = chessBoard.getPiece(new ChessPosition(j, i));
-               if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            for (int j=0; j <8; j++){
+               ChessPiece piece = chessBoard.getPiece(new ChessPosition(i+1, j+1));
+               if (piece == null){
+                  row[j] = " ";
+               } else if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
                    switch (piece.getPieceType()){
                        case ROOK -> row[j] = String.valueOf("♖");
                        case KNIGHT -> row[j] = String.valueOf("♘");

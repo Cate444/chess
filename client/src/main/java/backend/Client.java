@@ -357,7 +357,6 @@ public class Client implements ServerMessageObserver{
             ChessMove chessMove = convert(fromPosition, toPosition);
             try{
                 ws.move(chessMove, gameInvolvedIn, authData.authToken());
-
                 //renderBoard.render("WHITE");
                 //observing = true;
             } catch (Exception ex) {

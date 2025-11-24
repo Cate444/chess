@@ -79,18 +79,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, notification, userGameCommand.getGameID());
     }
     private void makeMove(WsMessageContext ctx) throws Exception{
-        Session session = ctx.session;
         MakeMoveGameCommand makeMoveGameCommand = new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class);
-            ChessMove chessMove = makeMoveGameCommand.getChessMove();
-            int gameID = makeMoveGameCommand.getGameID();
-            ChessGame chessGame = getGame(gameID);
-            if (chessGame == null) {
-                throw new Exception("game not found");
-            }
-            chessGame.makeMove(chessMove);
-            gameDataAccess.updateGameData(gameID, chessGame);
-            var update = new LoadGameMessage(chessGame);
-            connections.broadcast(null, update ,gameID);
+        ChessMove chessMove = makeMoveGameCommand.getChessMove();
+        int gameID = makeMoveGameCommand.getGameID();
+        ChessGame chessGame = getGame(gameID);
+        if (chessGame == null) {
+            throw new Exception("game not found");
+        }
+        ChessGame.TeamColor color = chessGame.getTeamTurn();
+        chessGame.makeMove(chessMove);
+        gameDataAccess.updateGameData(gameID, chessGame);
+        var update = new LoadGameMessage(chessGame, color);
+        connections.broadcast(null, update ,gameID);
     }
 
     private ChessGame getGame(int gameID) throws Exception {
