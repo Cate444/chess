@@ -7,9 +7,9 @@ import websocket.commands.UserGameCommand;
 public class LoadGameMessage extends ServerMessage{
 
     ChessGame chessGame;
-    ChessGame.TeamColor teamColor;
+    String teamColor;
 
-    public LoadGameMessage(ChessGame chessGame, ChessGame.TeamColor color){
+    public LoadGameMessage(ChessGame chessGame, String color){
         super(ServerMessageType.LOAD_GAME);
         this.chessGame = chessGame;
         teamColor = color;
@@ -19,7 +19,7 @@ public class LoadGameMessage extends ServerMessage{
         return chessGame.getBoard();
     }
 
-    public ChessGame.TeamColor getTeamColor(){
+    public String getTeamColor(){
         return teamColor;
     }
 }

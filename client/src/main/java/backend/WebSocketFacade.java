@@ -43,7 +43,7 @@ public class WebSocketFacade extends Endpoint {
                         case LOAD_GAME -> loadGameMessage(message);
                         default -> throw new IllegalStateException("Unexpected value: " + notification.getServerMessageType());
                     }
-                    serverMessageObserver.notify(notification);
+                    //serverMessageObserver.notify(notification);
                 }
             });
         } catch (Exception ex) {
@@ -65,14 +65,6 @@ public class WebSocketFacade extends Endpoint {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         ChessBoard chessBoard = loadGameMessage.gameBoard();
         String[][] board = transform(chessBoard);
-        System.out.println("");
-        for (int i = 0; i < 8; i++){
-            for (int j = 0; j < 8; j++){
-                System.out.print(board[i][j]);
-            }
-            System.out.println("");
-        }
-
         RenderBoard boardRender = new RenderBoard();
         boardRender.render(loadGameMessage.getTeamColor().toString(), board);
     }

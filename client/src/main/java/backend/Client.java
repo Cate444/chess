@@ -286,7 +286,7 @@ public class Client implements ServerMessageObserver{
             try {
                 server.joinGame(authData.authToken(), id, color);
                 ws.joinGame(authData.authToken(), id, color);
-                renderBoard.render(tokens[2]);
+                //renderBoard.render(tokens[2]);
                 inGame = true;
                 gameInvolvedIn = id;
             } catch (Exception ex) {

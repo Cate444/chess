@@ -66,6 +66,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String notificationString = String.format("%s is playing game %s as %s", username, gameName, color);
         var notification = new NotificationMessage(notificationString);
         connections.broadcast(session, notification, userGameCommand.getGameID());
+        int gameID = userGameCommand.getGameID();
+        ChessGame chessGame = getGame(gameID);
+        if (chessGame == null) {
+            throw new Exception("game not found");
+        }
+        gameDataAccess.updateGameData(gameID, chessGame);
+        var update = new LoadGameMessage(chessGame, color);
+        connections.broadcast(null, update ,gameID);
     }
 
     private void observe(WsMessageContext ctx) throws Exception {
@@ -78,6 +86,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var notification = new NotificationMessage(notificationString);
         connections.broadcast(session, notification, userGameCommand.getGameID());
     }
+
     private void makeMove(WsMessageContext ctx) throws Exception{
         MakeMoveGameCommand makeMoveGameCommand = new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class);
         ChessMove chessMove = makeMoveGameCommand.getChessMove();
@@ -86,7 +95,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if (chessGame == null) {
             throw new Exception("game not found");
         }
-        ChessGame.TeamColor color = chessGame.getTeamTurn();
+        String color = chessGame.getTeamTurn().toString();
         chessGame.makeMove(chessMove);
         gameDataAccess.updateGameData(gameID, chessGame);
         var update = new LoadGameMessage(chessGame, color);

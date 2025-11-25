@@ -106,9 +106,10 @@ public class RenderBoard {
                 else {setBlue(out);}
 
                 if (Objects.equals(color, "w")){
-                    out.print(" " + CHESS_START[7-boardRow][7-boardCol] + " ");
+                    out.print(" " + CHESS_START[7-boardRow][boardCol] + " ");
+                    //this might be indexing backwards
                 } else{
-                    out.print(" " + CHESS_START[boardRow][boardCol] + " ");
+                    out.print(" " + CHESS_START[boardRow][7-boardCol] + " ");
                 }
             }
 
