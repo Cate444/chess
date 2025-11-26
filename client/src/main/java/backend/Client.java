@@ -61,9 +61,7 @@ public class Client implements ServerMessageObserver{
     @Override
     public void notify(ServerMessage message){
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
-            //it breaks on this line
             NotificationMessage notificationMessage = (NotificationMessage) message;
-            String aMessage = notificationMessage.message;
             System.out.println(notificationMessage.message);
         } else {
             System.out.println(message.toString());
@@ -257,11 +255,10 @@ public class Client implements ServerMessageObserver{
         } else {
         try{
             Map<String, Object> games = server.listGames(authData.authToken());
-
             List<ReturnGameData> gameList = (List<ReturnGameData>) games.get("games");
             System.out.println("Game Name: WhitePlayer, BlackPlayer");
-            for (ReturnGameData game : gameList) {
-                System.out.printf("  %s: %s, %s%n", game.gameName(), game.whiteUsername(), game.blackUsername());
+            for(int i =0; i < gameList.size(); i++) {
+                System.out.printf(" %d) %s: %s, %s%n", i+1,gameList.get(i).gameName(), gameList.get(i).whiteUsername(), gameList.get(i).blackUsername());
             }
 
         } catch (Exception ex) {
@@ -274,19 +271,21 @@ public class Client implements ServerMessageObserver{
         }
     }
 
-    private void playGame(String[] tokens){
+    private void playGame(String[] tokens)  {
         if (tokens.length != 3){
             System.out.println("Invalid number of arguments. Usage: play <ID> [WHITE|BLACK]");
         } else if (!(Objects.equals(tokens[2].toUpperCase(), "WHITE") | Objects.equals(tokens[2].toUpperCase(), "BLACK"))){
             System.out.println("Invalid argument. Usage: play <ID> [WHITE|BLACK]");
         } else {
-            int id = Integer.parseInt(tokens[1]);
-            teamColor = tokens[2].toUpperCase();
-            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
             try {
+                Map<String, Object> games = server.listGames(authData.authToken());
+                List<ReturnGameData> gameList = (List<ReturnGameData>) games.get("games");
+                int index = Integer.parseInt(tokens[1]) - 1;
+                int id = gameList.get(index).gameID();
+                teamColor = tokens[2].toUpperCase();
+                ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
                 server.joinGame(authData.authToken(), id, color);
                 ws.joinGame(authData.authToken(), id, color);
-                //renderBoard.render(tokens[2]);
                 inGame = true;
                 gameInvolvedIn = id;
             } catch (Exception ex) {
@@ -325,7 +324,6 @@ public class Client implements ServerMessageObserver{
             int id = Integer.parseInt(tokens[1]);
             try{
                 ws.observeGame(id, authData.authToken());
-                renderBoard.render("WHITE");
                 observing = true;
                 gameInvolvedIn = id;
             } catch (Exception ex) {
@@ -348,17 +346,12 @@ public class Client implements ServerMessageObserver{
         if (tokens.length != 1){
             System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
         } else{
-            System.out.println("Please input colum then row ex. e5");
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("from: ");
-            String fromPosition = scanner.nextLine().strip();
-            System.out.print("to : ");
-            String toPosition = scanner.nextLine().strip();
+            List<String> positions = getPositions();
+            String fromPosition = positions.get(0);
+            String toPosition = positions.get(1);
             ChessMove chessMove = convert(fromPosition, toPosition);
             try{
                 ws.move(chessMove, gameInvolvedIn, authData.authToken());
-                //renderBoard.render("WHITE");
-                //observing = true;
             } catch (Exception ex) {
                 if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
                     System.out.println("you aren't authorized");
@@ -369,17 +362,97 @@ public class Client implements ServerMessageObserver{
         }
     }
 
-    private ChessMove convert(String fromPosition, String toPosition){
-        // trim & basic validation
+    private List<String> getPositions(){
+        System.out.println("Please input colum then row ex. e5");
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("from: ");
+        String fromPosition = scanner.nextLine().strip();
+        System.out.print("to : ");
+        String toPosition = scanner.nextLine().strip();
+        ArrayList<String> returnList = new ArrayList<>();
+        returnList.add(0, fromPosition);
+        returnList.add(toPosition);
+        return  returnList;
+    }
+
+    private ArrayList<String> isCleanPositions(String fromPosition, String toPosition){
+        ArrayList<String> positions = new ArrayList<>();
         if (fromPosition == null || toPosition == null) {
-            throw new IllegalArgumentException("positions cannot be null");
+            return positions;
         }
+
         fromPosition = fromPosition.strip();
         toPosition   = toPosition.strip();
 
+        String cleanFromPosition = "";
+        String cleanToPosition = "";
+
+        //checks length and takes out white space
         if (fromPosition.length() < 2 || toPosition.length() < 2) {
-            throw new IllegalArgumentException("positions must be like \"a2\"");
+            return positions;
+        } else if (fromPosition.length() > 2 || toPosition.length() > 2){
+            for (int i= 0; i<fromPosition.length(); i++){
+                if (!Character.isWhitespace(fromPosition.charAt(i)) ){
+                    cleanFromPosition += fromPosition.charAt(i);
+                }
+            }
+            for (int i= 0; i<toPosition.length(); i++){
+                if (!Character.isWhitespace(toPosition.charAt(i)) ){
+                    cleanToPosition += toPosition.charAt(i);
+                }
+            }
+        } else{
+            cleanFromPosition = fromPosition;
+            cleanToPosition = toPosition;
+
         }
+        // check letter then digit
+        if(!Character.isLetter(cleanFromPosition.charAt(0)) || !Character.isDigit(cleanFromPosition.charAt(1))){
+            if(Character.isLetter(cleanFromPosition.charAt(1)) || Character.isDigit(cleanFromPosition.charAt(0))){
+                cleanFromPosition = String.valueOf(cleanFromPosition.charAt(1)) + cleanFromPosition.charAt(0);
+            } else {
+                System.out.println("positions must be like \"a2\"");
+                return positions;
+            }
+        }
+        if (!Character.isLetter(cleanToPosition.charAt(0)) || !Character.isDigit(cleanToPosition.charAt(1))){
+            if(Character.isLetter(cleanToPosition.charAt(1)) || Character.isDigit(cleanToPosition.charAt(0))){
+                cleanToPosition = String.valueOf(cleanToPosition.charAt(1)) + String.valueOf(cleanToPosition.charAt(0));
+            } else {
+                System.out.println("positions must be like \"a2\"");
+                return positions;
+            }
+        }
+
+        //check that position is within index
+        String letts = "abcdegfh";
+        String nums = "12345678";
+        if (letts.indexOf(cleanToPosition.charAt(0)) == -1){
+            System.out.println("pick column a. b. c. d. e. f. g. or h");
+            return positions;
+        }
+        if (nums.indexOf(cleanToPosition.charAt(1)) == -1){
+            System.out.println("pick row 1. 2. 3. 4. 5. 6. 7. or 8");
+            return positions;
+        }
+
+        positions.add(0, cleanFromPosition);
+        positions.add(1, cleanToPosition);
+        return positions;
+    }
+
+
+    private ChessMove convert(String fromPosition, String toPosition){
+        // trim & basic validation
+        ArrayList<String> positions = isCleanPositions(fromPosition, toPosition);
+        while (positions.size() == 0){
+            List<String> rawPositions = getPositions();
+            fromPosition = rawPositions.get(0);
+            toPosition = rawPositions.get(1);
+            positions = isCleanPositions(fromPosition, toPosition);
+        }
+        fromPosition = positions.get(0);
+        toPosition = positions.get(1);
 
         // letter is column (a-h), number is row (1-8)
         char fromColChar = Character.toLowerCase(fromPosition.charAt(0)); // 'a'

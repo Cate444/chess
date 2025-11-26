@@ -85,6 +85,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String notificationString = String.format("%s is observing game %s", username, gameName);
         var notification = new NotificationMessage(notificationString);
         connections.broadcast(session, notification, userGameCommand.getGameID());
+
+        int gameID = userGameCommand.getGameID();
+        ChessGame chessGame = getGame(gameID);
+        if (chessGame == null) {
+            throw new Exception("game not found");
+        }
+        var update = new LoadGameMessage(chessGame, "WHITE");
+        connections.broadcast(null, update ,gameID);
     }
 
     private void makeMove(WsMessageContext ctx) throws Exception{
@@ -96,7 +104,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             throw new Exception("game not found");
         }
         String color = chessGame.getTeamTurn().toString();
-        chessGame.makeMove(chessMove);
+        try{
+            chessGame.makeMove(chessMove);
+        } catch (Exception ex){
+            var error = new GameM
+        }
+
         gameDataAccess.updateGameData(gameID, chessGame);
         var update = new LoadGameMessage(chessGame, color);
         connections.broadcast(null, update ,gameID);
