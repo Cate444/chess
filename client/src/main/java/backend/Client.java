@@ -11,6 +11,7 @@ import datamodel.GameData;
 import datamodel.ReturnGameData;
 import server.ServerFacade;
 import ui.RenderBoard;
+import websocket.messages.ErrorMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
@@ -63,6 +64,15 @@ public class Client implements ServerMessageObserver{
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
             NotificationMessage notificationMessage = (NotificationMessage) message;
             System.out.println(notificationMessage.message);
+        } else {
+            System.out.println(message.toString());
+        }
+    }
+
+    public void notifyError(ErrorMessage message){
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
+            //String aMessage = message.message;
+            System.out.println(message.message);
         } else {
             System.out.println(message.toString());
         }

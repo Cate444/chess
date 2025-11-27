@@ -13,9 +13,11 @@ import websocket.commands.JoinGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -60,59 +62,69 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         JoinGameCommand joinGameCommand = new Gson().fromJson(ctx.message(), JoinGameCommand.class);
         UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
-        String username = userDataAccess.getUser(userGameCommand.getAuthToken());
-        String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
-        String color = joinGameCommand.teamColor.toString();
-        String notificationString = String.format("%s is playing game %s as %s", username, gameName, color);
-        var notification = new NotificationMessage(notificationString);
-        connections.broadcast(session, notification, userGameCommand.getGameID());
-        int gameID = userGameCommand.getGameID();
-        ChessGame chessGame = getGame(gameID);
-        if (chessGame == null) {
-            throw new Exception("game not found");
+        try {
+            String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+            String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
+            String color = joinGameCommand.teamColor.toString();
+            String notificationString = String.format("%s is playing game %s as %s", username, gameName, color);
+            var notification = new NotificationMessage(notificationString);
+            connections.broadcast(session, notification, userGameCommand.getGameID());
+            int gameID = userGameCommand.getGameID();
+            ChessGame chessGame = getGame(gameID);
+            if (chessGame == null) {
+                throw new Exception("game not found");
+            }
+            gameDataAccess.updateGameData(gameID, chessGame);
+            var update = new LoadGameMessage(chessGame, color);
+            connections.broadcast(null, update, gameID);
+        } catch (Exception ex) {
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcast(null, error, userGameCommand.getGameID());
         }
-        gameDataAccess.updateGameData(gameID, chessGame);
-        var update = new LoadGameMessage(chessGame, color);
-        connections.broadcast(null, update ,gameID);
     }
 
-    private void observe(WsMessageContext ctx) throws Exception {
+    private void observe(WsMessageContext ctx) throws IOException {
         Session session = ctx.session;
         UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
-        String username = userDataAccess.getUser(userGameCommand.getAuthToken());
-        String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
-        String notificationString = String.format("%s is observing game %s", username, gameName);
-        var notification = new NotificationMessage(notificationString);
-        connections.broadcast(session, notification, userGameCommand.getGameID());
-
-        int gameID = userGameCommand.getGameID();
-        ChessGame chessGame = getGame(gameID);
-        if (chessGame == null) {
-            throw new Exception("game not found");
+        try {
+            String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+            String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
+            String notificationString = String.format("%s is observing game %s", username, gameName);
+            var notification = new NotificationMessage(notificationString);
+            connections.broadcast(session, notification, userGameCommand.getGameID());
+            int gameID = userGameCommand.getGameID();
+            ChessGame chessGame = getGame(gameID);
+            if (chessGame == null) {
+                throw new Exception("game not found");
+            }
+            var update = new LoadGameMessage(chessGame, "WHITE");
+            connections.broadcast(null, update ,gameID);
+        } catch (Exception ex) {
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(session, error);
         }
-        var update = new LoadGameMessage(chessGame, "WHITE");
-        connections.broadcast(null, update ,gameID);
+
     }
 
-    private void makeMove(WsMessageContext ctx) throws Exception{
+    private void makeMove(WsMessageContext ctx) throws IOException {
         MakeMoveGameCommand makeMoveGameCommand = new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class);
         ChessMove chessMove = makeMoveGameCommand.getChessMove();
         int gameID = makeMoveGameCommand.getGameID();
-        ChessGame chessGame = getGame(gameID);
-        if (chessGame == null) {
-            throw new Exception("game not found");
-        }
-        String color = chessGame.getTeamTurn().toString();
         try{
+            ChessGame chessGame = getGame(gameID);
+            if (chessGame == null) {
+                throw new Exception("game not found");
+            }
+            String color = chessGame.getTeamTurn().toString();
             chessGame.makeMove(chessMove);
+            gameDataAccess.updateGameData(gameID, chessGame);
+            var update = new LoadGameMessage(chessGame, color);
+            connections.broadcast(null, update ,gameID);
         } catch (Exception ex){
-            var error = new GameM
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(ctx.session, error);
         }
-
-        gameDataAccess.updateGameData(gameID, chessGame);
-        var update = new LoadGameMessage(chessGame, color);
-        connections.broadcast(null, update ,gameID);
     }
 
     private ChessGame getGame(int gameID) throws Exception {
@@ -127,14 +139,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void leave(WsMessageContext ctx) throws Exception{
-        Session session = ctx.session;
-        UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-        connections.remove(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
-        String username = userDataAccess.getUser(userGameCommand.getAuthToken());
-        String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
-        String notificationString = String.format("%s left game %s", username, gameName);
-        var notification = new NotificationMessage(notificationString);
-        connections.broadcast(session, notification, userGameCommand.getGameID());
+        try {
+            Session session = ctx.session;
+            UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            connections.remove(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
+            String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+            String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
+            String notificationString = String.format("%s left game %s", username, gameName);
+            var notification = new NotificationMessage(notificationString);
+            connections.broadcast(session, notification, userGameCommand.getGameID());
+        } catch (Exception ex) {
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(ctx.session, error);
+        }
     }
 
     private void resign(){}

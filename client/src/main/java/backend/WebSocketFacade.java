@@ -10,6 +10,7 @@ import ui.RenderBoard;
 import websocket.commands.JoinGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -39,7 +40,7 @@ public class WebSocketFacade extends Endpoint {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     switch (notification.getServerMessageType()) {
                         case NOTIFICATION -> notificationMessage(message);
-//                        case ERROR -> ;
+                        case ERROR -> errorMessage(message);
                         case LOAD_GAME -> loadGameMessage(message);
                         default -> throw new IllegalStateException("Unexpected value: " + notification.getServerMessageType());
                     }
@@ -59,6 +60,11 @@ public class WebSocketFacade extends Endpoint {
     private void notificationMessage(String message){
         NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
         serverMessageObserver.notifyNotification(notificationMessage);
+    }
+
+    private void errorMessage(String message){
+        ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+        serverMessageObserver.notifyError(errorMessage);
     }
 
     private void loadGameMessage(String message){

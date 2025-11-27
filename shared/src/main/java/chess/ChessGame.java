@@ -84,6 +84,9 @@ public class ChessGame {
         if (piece == null) {
             throw new InvalidMoveException("No piece at start position.");
         }
+        if (piece.getTeamColor() != teamTurn){
+            throw new InvalidMoveException("It's not your turn");
+        }
 
         if (!validMoves(move.getStartPosition()).contains(move) || piece.getTeamColor() != teamTurn) {
             throw new InvalidMoveException("Invalid move: " + move);
