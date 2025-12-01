@@ -59,9 +59,9 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastError(Session session, ErrorMessage errorMessage) throws IOException {
+    public void broadcastError(Session session, ServerMessage serverMessage) throws IOException {
         Gson gson = new Gson();
-        String msg = gson.toJson(errorMessage);
+        String msg = gson.toJson(serverMessage);
         if (session.isOpen()){
             session.getRemote().sendString(msg);
         }

@@ -123,19 +123,20 @@ public class Client implements ServerMessageObserver{
             case "leave" -> leave(tokens);
             case "move" -> move(tokens);
             case "resign" -> {}
-            case "highlight" -> {}
+            case "highlight" -> highlight(tokens);
             default -> System.out.println("""
                     redraw - redraws board
                     leave - lets you leave the game
                     move - starts process of making move you'll be asked from where to where
                     resign - removes you from current game then leaves
-                    highlight moves - shows possible moves
+                    highlight moves <POSITION> - shows possible for piece in that square
                     menu - return to login state
                     quit - to exit
                     help - see options""");
         }
         return true;
     }
+
 
     private boolean handleObserving(Scanner scanner) {
         System.out.print("[OBSERVING] >>> ");
@@ -368,6 +369,32 @@ public class Client implements ServerMessageObserver{
                 } else {
                     System.out.println("internal server error");
                 }
+            }
+        }
+    }
+
+    private void highlight(String[] tokens){
+        if( tokens.length != 3){
+            System.out.println("Invalid number of arguments. Usage: highlight moves <POSITION>");
+        }
+        String position = isCleanPositions(tokens[2], tokens[2]).get(0);
+        while (position == null){
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Please input colum then row ex. e5 ");
+            String rawPosition = scanner.nextLine().strip();
+            position = isCleanPositions(rawPosition, rawPosition).get(0);
+        }
+        Integer col = letters.get(Character.toLowerCase(position.charAt(0)));
+        Integer row = numbers.get(position.charAt(1));
+        ChessPosition chessPosition = new ChessPosition(row, col);
+        try{
+            ws.highlight(chessPosition, gameInvolvedIn, authData.authToken());
+            System.out.printf("You would highlight position %s", position);
+        }catch (Exception ex){
+            if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                System.out.println("you aren't authorized");
+            } else {
+                System.out.println("internal server error");
             }
         }
     }

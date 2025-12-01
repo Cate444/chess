@@ -1,7 +1,10 @@
 package ui;
 
+import chess.ChessPosition;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 
 import static ui.EscapeSequences.*;
@@ -50,10 +53,16 @@ public class RenderBoard {
 //    }
 
     public void render(String teamColor) {
-        render(teamColor,BLACK_CHESS_START);
+        List<ChessPosition> positions = List.of();
+        render(teamColor, BLACK_CHESS_START, positions);
     }
 
-    public void render(String teamColor, String[][] CHESS_START) {
+    public void render(String teamColor, String[][] CHESS_START){
+        List<ChessPosition> positions = List.of();
+        render(teamColor,CHESS_START, positions);
+    }
+
+    public void render(String teamColor, String[][] CHESS_START, List<ChessPosition> positions) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         String whiteHeader = "    a  b  c  d  e  f  g  h    ";
         String blackHeader = "    h  g  f  e  d  c  b  a    ";
@@ -61,11 +70,11 @@ public class RenderBoard {
         System.out.println("");
         if (teamColor.equalsIgnoreCase("WHITE")) {
             drawHeader(out, whiteHeader);
-            drawChessBoard(out, "w", CHESS_START);
+            drawChessBoard(out, "w", CHESS_START, positions);
             drawHeader(out, whiteHeader);
         } else if (teamColor.equalsIgnoreCase("BLACK")) {
             drawHeader(out, blackHeader);
-            drawChessBoard(out, "b", CHESS_START);
+            drawChessBoard(out, "b", CHESS_START, positions);
             drawHeader(out, blackHeader);
         }
     }
@@ -84,7 +93,7 @@ public class RenderBoard {
 
 
     // Draws 8x8 board with row numbers and color reset after each line
-    private static void drawChessBoard(PrintStream out, String color, String[][] CHESS_START) {
+    private static void drawChessBoard(PrintStream out, String color, String[][] CHESS_START, List<ChessPosition> positions) {
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
 
             // Left-side number (8 down to 1)
@@ -102,13 +111,20 @@ public class RenderBoard {
                 isWhiteSquare = (boardRow + boardCol) % 2 == 0;
                 setWhite(out);
 
+
                 if (isWhiteSquare){setWhite(out);}
                 else {setBlue(out);}
 
                 if (Objects.equals(color, "w")){
+                    if (positions.contains(new ChessPosition(8-boardRow, boardCol+1))){
+                        setGreen(out);
+                    }
                     out.print(" " + CHESS_START[7-boardRow][boardCol] + " ");
                     //this might be indexing backwards
                 } else{
+                    if (positions.contains(new ChessPosition(boardRow-1, 8-boardCol))){
+                        setGreen(out);
+                    }
                     out.print(" " + CHESS_START[boardRow][7-boardCol] + " ");
                 }
             }
@@ -137,6 +153,11 @@ public class RenderBoard {
 
     private static void setBlue(PrintStream out) {
         out.print(SET_BG_COLOR_BLUE);
+        out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_GREEN);
         out.print(SET_TEXT_COLOR_BLACK);
     }
 }

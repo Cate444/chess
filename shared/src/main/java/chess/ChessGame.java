@@ -89,7 +89,7 @@ public class ChessGame {
         }
 
         if (!validMoves(move.getStartPosition()).contains(move) || piece.getTeamColor() != teamTurn) {
-            throw new InvalidMoveException("Invalid move: " + move);
+            throw new InvalidMoveException("Invalid move: from- " + move.startPosition + " to- " + move.endPosition);
         }
 
         // Handle promotions
@@ -100,9 +100,19 @@ public class ChessGame {
             board.addPiece(move.getEndPosition(), promotion);
         }
         board.addPiece(move.getStartPosition(), null);
-
         // Switch turn
         teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+    }
+
+    public String checkStatus(TeamColor teamColor){
+        if (isInCheckmate(teamTurn)){
+            return (teamTurn.toString() + " is in check mate");
+        } else if (isInCheck(teamTurn)){
+            return (teamTurn.toString() + " is in check");
+        } else if (isInStalemate(teamTurn)){
+            return (teamTurn.toString() + " is in stale mate");
+        }
+        return null;
     }
 
     /**
@@ -125,6 +135,7 @@ public class ChessGame {
                 for (ChessMove move : piece.pieceMoves(board, pos)) {
                     if (move.getEndPosition().equals(kingPos)) {
                         return true;
+                        // have to throw that you're in check
                     }
                 }
             }

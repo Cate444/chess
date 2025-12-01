@@ -1,7 +1,9 @@
 package server.websocket;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.GameDataAccess;
 import dataaccess.SQLGameDataAccess;
@@ -9,16 +11,21 @@ import dataaccess.SQLUserDataAccess;
 import dataaccess.UserDataAccess;
 import datamodel.GameData;
 import io.javalin.websocket.*;
+import websocket.commands.HighlightGameCommand;
 import websocket.commands.JoinGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ErrorMessage;
+import websocket.messages.HighlightMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
 
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -46,6 +53,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case MAKE_MOVE -> makeMove(ctx);
                 case LEAVE -> leave(ctx);
                 case RESIGN -> resign();
+                case HIGHLIGHT -> highlight(ctx);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -59,6 +67,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(WsMessageContext ctx) throws Exception{
         Session session = ctx.session;
+        // the test don't pass a color so ask TA how we are supposed to get that
         JoinGameCommand joinGameCommand = new Gson().fromJson(ctx.message(), JoinGameCommand.class);
         UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
@@ -66,7 +75,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = userDataAccess.getUser(userGameCommand.getAuthToken());
             String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
             String color = joinGameCommand.teamColor.toString();
-            String notificationString = String.format("%s is playing game %s as %s", username, gameName, color);
+            String notificationString = String.format("%s is playing game %s", username, gameName);
             var notification = new NotificationMessage(notificationString);
             connections.broadcast(session, notification, userGameCommand.getGameID());
             int gameID = userGameCommand.getGameID();
@@ -101,6 +110,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var update = new LoadGameMessage(chessGame, "WHITE");
             connections.broadcast(null, update ,gameID);
         } catch (Exception ex) {
+            //when test sends load game message I get an error on the broadcast function
             var error = new ErrorMessage(ex.getMessage());
             connections.broadcastError(session, error);
         }
@@ -121,6 +131,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             gameDataAccess.updateGameData(gameID, chessGame);
             var update = new LoadGameMessage(chessGame, color);
             connections.broadcast(null, update ,gameID);
+
+            String status = chessGame.checkStatus(chessGame.getTeamTurn());
+            if (status != null){
+                var notification = new NotificationMessage(status);
+                connections.broadcast(ctx.session, notification, gameID);
+            }
+            if (color == "WHITE"){
+                status = chessGame.checkStatus(ChessGame.TeamColor.BLACK);
+                if (status != null){
+                    var notification = new NotificationMessage(status);
+                    connections.broadcast(ctx.session, notification, gameID);
+                }
+            } else {
+                status = chessGame.checkStatus(ChessGame.TeamColor.WHITE);
+                if (status != null){
+                    var notification = new NotificationMessage(status);
+                    connections.broadcast(ctx.session, notification, gameID);
+                }
+            }
+
         } catch (Exception ex){
             var error = new ErrorMessage(ex.getMessage());
             connections.broadcastError(ctx.session, error);
@@ -155,5 +185,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void resign(){}
+
+    private void highlight(WsMessageContext ctx) throws Exception{
+        Session session = ctx.session;
+        HighlightGameCommand highlightGameCommand = new Gson().fromJson(ctx.message(), HighlightGameCommand.class);
+        chess.ChessPosition position = highlightGameCommand.getPosition();
+        int gameID = highlightGameCommand.getGameID();
+        try {
+            ChessGame chessGame = getGame(gameID);
+            if (chessGame == null) {
+                throw new Exception("game not found");
+            }
+            Collection<ChessMove> moves = chessGame.validMoves(position);
+            var notification = new HighlightMessage(moves, chessGame.getBoard());
+            connections.broadcastError(session, notification);
+        } catch (Exception ex) {
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(ctx.session, error);
+        }
+    }
 
 }

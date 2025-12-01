@@ -7,22 +7,24 @@ import com.google.gson.Gson;
 
 import jakarta.websocket.*;
 import ui.RenderBoard;
+import websocket.commands.HighlightGameCommand;
 import websocket.commands.JoinGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
 
     Session session;
     ServerMessageObserver serverMessageObserver;
+    ChessGame.TeamColor teamColor;
 
     public WebSocketFacade(String url, ServerMessageObserver serverMessageObserver) throws Exception {
         try {
@@ -42,6 +44,7 @@ public class WebSocketFacade extends Endpoint {
                         case NOTIFICATION -> notificationMessage(message);
                         case ERROR -> errorMessage(message);
                         case LOAD_GAME -> loadGameMessage(message);
+                        case HIGHLIGHT -> highlightMessage(message);
                         default -> throw new IllegalStateException("Unexpected value: " + notification.getServerMessageType());
                     }
                     //serverMessageObserver.notify(notification);
@@ -55,6 +58,20 @@ public class WebSocketFacade extends Endpoint {
     //Endpoint requires this method, but you don't have to do anything
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
+
+    private void highlightMessage(String message){
+        HighlightMessage highlightMessage = new Gson().fromJson(message, HighlightMessage.class);
+        ChessBoard chessBoard = highlightMessage.getBoard();
+        String[][] board = transform(chessBoard);
+        Collection<ChessMove> moves = highlightMessage.getMoves();
+        List<ChessPosition> positions = new ArrayList<>();
+        for (ChessMove move : moves) {
+            positions.add(move.getEndPosition());
+            System.out.println(move.getEndPosition().toString());
+        }
+        RenderBoard renderBoard = new RenderBoard();
+        renderBoard.render(teamColor.toString(),board, positions);
     }
 
     private void notificationMessage(String message){
@@ -72,13 +89,22 @@ public class WebSocketFacade extends Endpoint {
         ChessBoard chessBoard = loadGameMessage.gameBoard();
         String[][] board = transform(chessBoard);
         RenderBoard boardRender = new RenderBoard();
-        boardRender.render(loadGameMessage.getTeamColor().toString(), board);
+        boardRender.render(teamColor.toString(), board);
     }
 
     public void observeGame(int gameID, String authToken) throws IOException {
         try {
             var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.OBSERVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    public void highlight(ChessPosition position, int gameID, String authToken) throws IOException{
+        try {
+            var highlightCommand = new HighlightGameCommand(authToken, gameID, position);
+            this.session.getBasicRemote().sendText(new Gson().toJson(highlightCommand));
         } catch (Exception ex) {
             throw ex;
         }
@@ -122,6 +148,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var joinGameCommand = new JoinGameCommand(authToken, gameID, color);
             this.session.getBasicRemote().sendText(new Gson().toJson(joinGameCommand));
+            this.teamColor = color;
         } catch (Exception ex) {
             throw ex;
         }
@@ -131,6 +158,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+            teamColor = null;
         } catch (Exception ex) {
             throw ex;
         }

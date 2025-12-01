@@ -27,7 +27,8 @@ public class UserGameCommand {
         OBSERVE,
         MAKE_MOVE,
         LEAVE,
-        RESIGN
+        RESIGN,
+        HIGHLIGHT
     }
 
     public CommandType getCommandType() {

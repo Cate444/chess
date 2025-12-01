@@ -51,7 +51,7 @@ public class DatabaseTests {
     @Test
     @DisplayName("Persistence Test")
     @Order(1)
-    public void persistenceTest() {
+    public void persistenceTest() throws Exception {
         int initialRowCount = getDatabaseRows();
 
         TestAuthResult regResult = serverFacade.register(TEST_USER);
