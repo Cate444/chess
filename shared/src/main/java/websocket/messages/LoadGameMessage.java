@@ -2,21 +2,20 @@ package websocket.messages;
 
 import chess.ChessBoard;
 import chess.ChessGame;
-import websocket.commands.UserGameCommand;
 
 public class LoadGameMessage extends ServerMessage{
 
-    ChessGame chessGame;
+    ChessGame game;
     String teamColor;
 
     public LoadGameMessage(ChessGame chessGame, String color){
         super(ServerMessageType.LOAD_GAME);
-        this.chessGame = chessGame;
+        this.game = chessGame;
         teamColor = color;
     }
 
     public ChessBoard gameBoard(){
-        return chessGame.getBoard();
+        return game.getBoard();
     }
 
     public String getTeamColor(){

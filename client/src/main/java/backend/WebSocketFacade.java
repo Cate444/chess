@@ -89,7 +89,12 @@ public class WebSocketFacade extends Endpoint {
         ChessBoard chessBoard = loadGameMessage.gameBoard();
         String[][] board = transform(chessBoard);
         RenderBoard boardRender = new RenderBoard();
-        boardRender.render(teamColor.toString(), board);
+        if (teamColor == null){
+            boardRender.render("WHITE", board);
+        }else {
+            boardRender.render(teamColor.toString(), board);
+        }
+
     }
 
     public void observeGame(int gameID, String authToken) throws IOException {
@@ -169,6 +174,15 @@ public class WebSocketFacade extends Endpoint {
             var userGameCommand = new MakeMoveGameCommand(authToken, gameID, chessMove);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
         } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    public void redraw(int gameID, String authToken) throws Exception{
+        try{
+            UserGameCommand redrawCommand = new UserGameCommand(UserGameCommand.CommandType.REDRAW, authToken, gameID);
+            this.session.getBasicRemote().sendText((new Gson().toJson(redrawCommand)));
+        } catch (Exception ex){
             throw ex;
         }
     }

@@ -11,10 +11,7 @@ import dataaccess.SQLUserDataAccess;
 import dataaccess.UserDataAccess;
 import datamodel.GameData;
 import io.javalin.websocket.*;
-import websocket.commands.HighlightGameCommand;
-import websocket.commands.JoinGameCommand;
-import websocket.commands.MakeMoveGameCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ErrorMessage;
 import websocket.messages.HighlightMessage;
@@ -54,6 +51,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case LEAVE -> leave(ctx);
                 case RESIGN -> resign();
                 case HIGHLIGHT -> highlight(ctx);
+                case REDRAW -> redraw(ctx);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -67,14 +65,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(WsMessageContext ctx) throws Exception{
         Session session = ctx.session;
-        // the test don't pass a color so ask TA how we are supposed to get that
         JoinGameCommand joinGameCommand = new Gson().fromJson(ctx.message(), JoinGameCommand.class);
         UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
         try {
             String username = userDataAccess.getUser(userGameCommand.getAuthToken());
             String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
-            String color = joinGameCommand.teamColor.toString();
+            // the test don't pass a color so ask TA how we are supposed to get that
+            //String color = joinGameCommand.teamColor.toString();
             String notificationString = String.format("%s is playing game %s", username, gameName);
             var notification = new NotificationMessage(notificationString);
             connections.broadcast(session, notification, userGameCommand.getGameID());
@@ -84,11 +82,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new Exception("game not found");
             }
             gameDataAccess.updateGameData(gameID, chessGame);
+            String color = chessGame.getTeamTurn().toString();
             var update = new LoadGameMessage(chessGame, color);
-            connections.broadcast(null, update, gameID);
+            connections.broadcastError(ctx.session, update);
         } catch (Exception ex) {
             var error = new ErrorMessage(ex.getMessage());
-            connections.broadcast(null, error, userGameCommand.getGameID());
+            connections.broadcastError(ctx.session, error);
         }
     }
 
@@ -108,7 +107,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new Exception("game not found");
             }
             var update = new LoadGameMessage(chessGame, "WHITE");
-            connections.broadcast(null, update ,gameID);
+            connections.broadcastError(ctx.session, update);
         } catch (Exception ex) {
             //when test sends load game message I get an error on the broadcast function
             var error = new ErrorMessage(ex.getMessage());
@@ -200,6 +199,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var notification = new HighlightMessage(moves, chessGame.getBoard());
             connections.broadcastError(session, notification);
         } catch (Exception ex) {
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(ctx.session, error);
+        }
+    }
+
+    private void redraw(WsMessageContext ctx) throws Exception{
+        RedrawGameCommand redrawGameCommand = new Gson().fromJson(ctx.message(), RedrawGameCommand.class);
+        int gameID = redrawGameCommand.getGameID();
+        String color = redrawGameCommand.getColor().toString();
+        try {
+            ChessGame chessGame = getGame(gameID);
+            if (chessGame == null) {
+                throw new Exception("game not found");
+            }
+            var update = new LoadGameMessage(chessGame, color);
+            connections.broadcastError(ctx.session, update);
+        }catch (Exception ex) {
             var error = new ErrorMessage(ex.getMessage());
             connections.broadcastError(ctx.session, error);
         }

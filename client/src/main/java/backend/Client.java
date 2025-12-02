@@ -332,8 +332,11 @@ public class Client implements ServerMessageObserver{
         if (tokens.length != 2){
             System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
         } else{
-            int id = Integer.parseInt(tokens[1]);
             try{
+                Map<String, Object> games = server.listGames(authData.authToken());
+                List<ReturnGameData> gameList = (List<ReturnGameData>) games.get("games");
+                int index = Integer.parseInt(tokens[1]) - 1;
+                int id = gameList.get(index).gameID();
                 ws.observeGame(id, authData.authToken());
                 observing = true;
                 gameInvolvedIn = id;
@@ -347,10 +350,19 @@ public class Client implements ServerMessageObserver{
         }
     }
     private void redraw(String[] tokens){
-        if (tokens.length != 1){
-            System.out.println("Invalid number of arguments. Usage: redraw ");
-        } else {
-            renderBoard.render(teamColor);
+        try {
+            if (tokens.length != 1) {
+                System.out.println("Invalid number of arguments. Usage: redraw ");
+            } else {
+                ws.redraw(gameInvolvedIn, authData.authToken());
+                renderBoard.render(teamColor);
+            }
+        } catch (Exception ex){
+            if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                System.out.println("you aren't authorized");
+            } else {
+                System.out.println("internal server error");
+            }
         }
     }
     private void move(String[] tokens){
