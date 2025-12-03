@@ -45,7 +45,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case OBSERVE -> observe(ctx);
                 case MAKE_MOVE -> makeMove(ctx);
                 case LEAVE -> leave(ctx);
-                case RESIGN -> resign();
+                case RESIGN -> resign(ctx);
                 case HIGHLIGHT -> highlight(ctx);
                 case REDRAW -> redraw(ctx);
             }
@@ -131,6 +131,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     throw new Exception("not your turn");
                 }
             }
+            if (!chessGame.didAnyoneResign()){
+                throw new Exception("game is no longer playable");
+            }
             chessGame.makeMove(chessMove);
             gameDataAccess.updateGameData(gameID, chessGame);
             var update = new LoadGameMessage(chessGame, color);
@@ -187,7 +190,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(){}
+    private void resign(WsMessageContext ctx) throws IOException {
+        UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        int gameID = userGameCommand.getGameID();
+        try{
+            GameData gameData = gameDataAccess.getGameInfo(gameID);
+            String username = userDataAccess.getUser(userGameCommand.getAuthToken());
+            if (!username.equals(gameData.blackUsername()) && !username.equals(gameData.whiteUsername())){
+                throw new Exception("observer can't resign");
+            }
+            if (!gameData.chessGame().didAnyoneResign()){
+                throw new Exception("This game is already ended");
+            }
+
+            ChessGame game = getGame(gameID);
+            game.setStatusResign();
+            gameDataAccess.updateGameData(gameID, game);
+            var notification = new NotificationMessage(username + " resigned");
+            connections.broadcast(null, notification, gameID);
+        }catch (Exception ex){
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(ctx.session, error);
+        }
+    }
 
     private void highlight(WsMessageContext ctx) throws Exception{
         Session session = ctx.session;

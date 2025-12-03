@@ -410,6 +410,26 @@ public class Client implements ServerMessageObserver{
         }
     }
 
+    public void resign(String[] tokens){
+        if( tokens.length != 1){
+            System.out.println("Invalid number of arguments. Usage: resign");
+        }
+        try{
+            System.out.println("Are you sure you want to resign: y or n");
+            Scanner scanner = new Scanner(System.in);
+            String response = scanner.nextLine().strip();
+            if (response == "y"){
+                ws.resign(gameInvolvedIn, authData.authToken());
+            }
+        }catch (Exception ex){
+            if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
+                System.out.println("you aren't authorized");
+            } else {
+                System.out.println("internal server error");
+            }
+        }
+    }
+
     private List<String> getPositions(){
         System.out.println("Please input colum then row ex. e5");
         Scanner scanner = new Scanner(System.in);

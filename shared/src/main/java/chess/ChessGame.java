@@ -14,6 +14,7 @@ public class ChessGame {
 
     private TeamColor teamTurn;
     private ChessBoard board;
+    private boolean noOneResigned = true;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -111,8 +112,14 @@ public class ChessGame {
             return (teamTurn.toString() + " is in check");
         } else if (isInStalemate(teamTurn)){
             return (teamTurn.toString() + " is in stale mate");
+        } else if (!noOneResigned){
+            return ("game over player resigned");
         }
         return null;
+    }
+
+    public void setStatusResign(){
+        noOneResigned = false;
     }
 
     /**
@@ -213,6 +220,10 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public boolean didAnyoneResign(){
+        return noOneResigned;
     }
 
     @Override
