@@ -25,11 +25,7 @@ public class DatabaseTests {
 
     @BeforeAll
     public static void startServer() throws Exception {
-        try {
-            server = new Server();
-        } catch (Exception ex){
-            throw ex;
-        }
+        server = new Server();
 
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
