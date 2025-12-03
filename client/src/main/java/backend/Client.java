@@ -59,15 +59,6 @@ public class Client implements ServerMessageObserver{
        server = new ServerFacade(serverUrl);
        ws = new WebSocketFacade(serverUrl, this);
     }
-    @Override
-    public void notify(ServerMessage message){
-        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
-            NotificationMessage notificationMessage = (NotificationMessage) message;
-            System.out.println(notificationMessage.message);
-        } else {
-            System.out.println(message.toString());
-        }
-    }
 
     public void notifyError(ErrorMessage message){
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
