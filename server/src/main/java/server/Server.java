@@ -20,8 +20,7 @@ public class Server {
     private final Gson gson = new Gson();
     private final WebSocketHandler webSocketHandler;
 
-    public Server() throws  Exception{
-        webSocketHandler = new WebSocketHandler();
+    public Server() {
 
         UserDataAccess userDataAccess;
         GameDataAccess gameDataAccess;
@@ -33,6 +32,7 @@ public class Server {
             userDataAccess = new MemoryUserDataAccess();
             gameDataAccess = new MemoryGameDataAccess();
         }
+        webSocketHandler = new WebSocketHandler(userDataAccess, gameDataAccess);
 
         this.userService = new UserService(userDataAccess);
         this.gameService = new GameService(gameDataAccess, userDataAccess);

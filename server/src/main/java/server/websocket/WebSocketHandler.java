@@ -24,10 +24,12 @@ import java.util.Collection;
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
-    private final UserDataAccess userDataAccess = new SQLUserDataAccess();
-    private final GameDataAccess gameDataAccess = new SQLGameDataAccess();
+    private final UserDataAccess userDataAccess;
+    private final GameDataAccess gameDataAccess;
 
-    public WebSocketHandler() throws Exception {
+    public WebSocketHandler(UserDataAccess userDataAccess, GameDataAccess gameDataAccess) {
+        this.userDataAccess = userDataAccess;
+        this.gameDataAccess = gameDataAccess;
     }
 
     @Override
