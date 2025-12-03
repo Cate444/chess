@@ -267,7 +267,8 @@ public class Client implements ServerMessageObserver{
             List<ReturnGameData> gameList = (List<ReturnGameData>) games.get("games");
             System.out.println("Game Name: WhitePlayer, BlackPlayer");
             for(int i =0; i < gameList.size(); i++) {
-                System.out.printf(" %d) %s: %s, %s%n", i+1,gameList.get(i).gameName(), gameList.get(i).whiteUsername(), gameList.get(i).blackUsername());
+                System.out.printf(" %d) %s: %s, %s%n", i+1,gameList.get(i).gameName(), gameList.get(i).whiteUsername(),
+                        gameList.get(i).blackUsername());
             }
 
         } catch (Exception ex) {

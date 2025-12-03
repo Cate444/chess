@@ -12,7 +12,6 @@ import static ui.EscapeSequences.*;
 public class RenderBoard {
 
     private static final int BOARD_SIZE_IN_SQUARES = 8;
-//    private String teamColor;
 
     private static final String[][] WHITE_CHESS_START  = {
             {"♜","♞","♝","♛","♚","♝","♞","♜"},
@@ -36,22 +35,6 @@ public class RenderBoard {
             {"♜","♞","♝","♚","♛","♝","♞","♜"}
     };
 
-//    public static void main(String[] args) {
-//        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-//        String blackHeader = "    h  g  f  e  d  c  b  a    ";
-//
-//        out.print(ERASE_SCREEN);
-//        out.print(SET_TEXT_COLOR_WHITE);
-//
-//        drawHeader(out, blackHeader);
-//        drawChessBoard(out, "b");
-//        drawHeader(out, blackHeader);
-//
-//        // Reset color at the very end
-//        out.print(RESET_BG_COLOR);
-//        out.print(SET_TEXT_COLOR_WHITE);
-//    }
-
     public void render(String teamColor) {
         List<ChessPosition> positions = List.of();
         render(teamColor, BLACK_CHESS_START, positions);
@@ -62,7 +45,7 @@ public class RenderBoard {
         render(teamColor,CHESS_START, positions);
     }
 
-    public void render(String teamColor, String[][] CHESS_START, List<ChessPosition> positions) {
+    public void render(String teamColor, String[][] chessStart, List<ChessPosition> positions) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         String whiteHeader = "    a  b  c  d  e  f  g  h    ";
         String blackHeader = "    h  g  f  e  d  c  b  a    ";
@@ -70,11 +53,11 @@ public class RenderBoard {
         System.out.println("");
         if (teamColor.equalsIgnoreCase("WHITE")) {
             drawHeader(out, whiteHeader);
-            drawChessBoard(out, "w", CHESS_START, positions);
+            drawChessBoard(out, "w", chessStart, positions);
             drawHeader(out, whiteHeader);
         } else if (teamColor.equalsIgnoreCase("BLACK")) {
             drawHeader(out, blackHeader);
-            drawChessBoard(out, "b", CHESS_START, positions);
+            drawChessBoard(out, "b", chessStart, positions);
             drawHeader(out, blackHeader);
         }
     }
