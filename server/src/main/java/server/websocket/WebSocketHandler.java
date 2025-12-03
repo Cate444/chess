@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.GameDataAccess;
 import dataaccess.SQLGameDataAccess;
@@ -19,9 +20,15 @@ import websocket.messages.NotificationMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
+
+    private final Map<Integer, String> letters = Map.of(
+            1, "a",2, "b",3, "c",4, "d",5, "e",6, "f",7, "g",8, "h");
+    private final Map<Character, Integer> numbers = Map.of(
+            '1', 1,'2', 2,'3', 3,'4', 4,'5', 5,'6', 7,'8', 8);
 
     private final ConnectionManager connections = new ConnectionManager();
     private final UserDataAccess userDataAccess;
@@ -144,16 +151,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var notification = new NotificationMessage(status);
                 connections.broadcast(ctx.session, notification, gameID);
             }
+
+            String startPosition = convertPosition(chessMove.getStartPosition());
+            String endPosition = convertPosition(chessMove.getEndPosition());
+
             if (color == "WHITE"){
                 status = chessGame.checkStatus(ChessGame.TeamColor.BLACK);
                 if (status == null){
-                    var notification = new NotificationMessage("status is still good");
+                    var notification = new NotificationMessage(dataBaseUsername + " moved from " + startPosition +
+                            " to " + endPosition);
                     connections.broadcast(ctx.session, notification, gameID);
                 }
             } else {
                 status = chessGame.checkStatus(ChessGame.TeamColor.WHITE);
                 if (status == null){
-                    var notification = new NotificationMessage("status is still good");
+                    var notification = new NotificationMessage(dataBaseUsername + " moved from " + startPosition +
+                            " to " + endPosition);
                     connections.broadcast(ctx.session, notification, gameID);
                 }
             }
@@ -259,6 +272,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var error = new ErrorMessage(ex.getMessage());
             connections.broadcastError(ctx.session, error);
         }
+    }
+
+    private String convertPosition(ChessPosition position){
+       String col = letters.get(position.getColumn());
+       String row = String.valueOf(position.getRow());
+       return col + row;
     }
 
 }
