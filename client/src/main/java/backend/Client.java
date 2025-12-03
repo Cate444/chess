@@ -71,8 +71,7 @@ public class Client implements ServerMessageObserver{
 
     public void notifyError(ErrorMessage message){
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
-            //String aMessage = message.message;
-            System.out.println(message.message);
+            System.out.println(message.getMessage());
         } else {
             System.out.println(message.toString());
         }
@@ -80,7 +79,6 @@ public class Client implements ServerMessageObserver{
 
     public void notifyNotification(NotificationMessage message){
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
-            //String aMessage = message.message;
             System.out.println(message.message);
         } else {
             System.out.println(message.toString());
@@ -122,7 +120,7 @@ public class Client implements ServerMessageObserver{
             case "redraw" -> redraw(tokens);
             case "leave" -> leave(tokens);
             case "move" -> move(tokens);
-            case "resign" -> {}
+            case "resign" -> resign(tokens);
             case "highlight" -> highlight(tokens);
             default -> System.out.println("""
                     redraw - redraws board
@@ -365,6 +363,7 @@ public class Client implements ServerMessageObserver{
             }
         }
     }
+
     private void move(String[] tokens){
         if (tokens.length != 1){
             System.out.println("Invalid number of arguments. Usage: observe game <ID> ");
@@ -524,7 +523,6 @@ public class Client implements ServerMessageObserver{
         ChessPosition toObj   = new ChessPosition(toRow, toCol);
 
         ChessPiece.PieceType pieceType = null;
-        // use equals to compare strings
         if ((toRow == 8 && "WHITE".equals(teamColor)) || (toRow == 1 && "BLACK".equals(teamColor))){
             Scanner scanner = new Scanner(System.in);
             System.out.print("What piece would you like to promote to: ");

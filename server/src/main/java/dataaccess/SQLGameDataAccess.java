@@ -236,5 +236,39 @@ public class SQLGameDataAccess implements GameDataAccess {
         }
     }
 
+    @Override
+    public GameData getGameInfo(int gameID) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String getGames = "SELECT * FROM gameTable WHERE gameID = ?";
+            try (var preparedStatement = conn.prepareStatement(getGames)) {
+                preparedStatement.setInt(1, gameID);
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    return null;
+                }
+
+                String gameName = rs.getString("gameName");
+                String game = rs.getString("game");
+                ChessGame chessGame = new Gson().fromJson(game, ChessGame.class);
+                String whiteUsername;
+                String blackUsername;
+
+                if (rs.getString("whiteUsername") != null){
+                    whiteUsername = rs.getString("whiteUsername");
+                } else {
+                    whiteUsername = null;
+                }
+                if (rs.getString("blackUsername") != null){
+                    blackUsername = rs.getString("blackUsername");
+                } else {
+                    blackUsername = null;
+                }
+                return new GameData(gameID, whiteUsername, blackUsername, "gameName", chessGame);
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
 
 }

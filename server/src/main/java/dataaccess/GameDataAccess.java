@@ -16,4 +16,5 @@ public interface GameDataAccess {
     ArrayList<GameData> listGamesWithGameInfo() throws Exception;
     String getGameName(int gameID) throws Exception;
     void updateGameData(int gameID, ChessGame chessGame) throws Exception;
+    GameData getGameInfo(int gameID) throws Exception;
 }

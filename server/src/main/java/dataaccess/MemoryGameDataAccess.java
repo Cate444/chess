@@ -88,4 +88,14 @@ public class MemoryGameDataAccess implements GameDataAccess {
           }
         }
     }
+
+    @Override
+    public GameData getGameInfo(int gameID) throws Exception{
+        for (GameData gameData: gameList){
+            if (gameData.gameID() == gameID){
+                return gameData;
+            }
+        }
+        return null;
+    }
 }

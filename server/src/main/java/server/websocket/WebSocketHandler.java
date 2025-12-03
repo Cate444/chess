@@ -1,9 +1,7 @@
 package server.websocket;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
-import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.GameDataAccess;
 import dataaccess.SQLGameDataAccess;
@@ -19,10 +17,8 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -71,8 +67,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             String username = userDataAccess.getUser(userGameCommand.getAuthToken());
             String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
-            // the test don't pass a color so ask TA how we are supposed to get that
-            //String color = joinGameCommand.teamColor.toString();
             String notificationString = String.format("%s is playing game %s", username, gameName);
             var notification = new NotificationMessage(notificationString);
             connections.broadcast(session, notification, userGameCommand.getGameID());
@@ -109,7 +103,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var update = new LoadGameMessage(chessGame, "WHITE");
             connections.broadcastError(ctx.session, update);
         } catch (Exception ex) {
-            //when test sends load game message I get an error on the broadcast function
             var error = new ErrorMessage(ex.getMessage());
             connections.broadcastError(session, error);
         }
@@ -118,7 +111,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void makeMove(WsMessageContext ctx) throws IOException {
         MakeMoveGameCommand makeMoveGameCommand = new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class);
-        ChessMove chessMove = makeMoveGameCommand.getChessMove();
+        ChessMove chessMove = makeMoveGameCommand.getMove();
+        String authToken = makeMoveGameCommand.getAuthToken();
         int gameID = makeMoveGameCommand.getGameID();
         try{
             ChessGame chessGame = getGame(gameID);
@@ -126,11 +120,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new Exception("game not found");
             }
             String color = chessGame.getTeamTurn().toString();
+            GameData gameData = gameDataAccess.getGameInfo(gameID);
+            String dataBaseUsername = userDataAccess.getUser(authToken);
+            if(ChessGame.TeamColor.WHITE == chessGame.getTeamTurn()){
+                if (!gameData.whiteUsername().equals(dataBaseUsername)){
+                    throw new Exception("not your turn");
+                }
+            } else if (!ChessGame.TeamColor.BLACK.equals(chessGame.getTeamTurn())){
+                if (gameData.blackUsername() != dataBaseUsername){
+                    throw new Exception("not your turn");
+                }
+            }
             chessGame.makeMove(chessMove);
             gameDataAccess.updateGameData(gameID, chessGame);
             var update = new LoadGameMessage(chessGame, color);
             connections.broadcast(null, update ,gameID);
-
             String status = chessGame.checkStatus(chessGame.getTeamTurn());
             if (status != null){
                 var notification = new NotificationMessage(status);
@@ -138,14 +142,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             }
             if (color == "WHITE"){
                 status = chessGame.checkStatus(ChessGame.TeamColor.BLACK);
-                if (status != null){
-                    var notification = new NotificationMessage(status);
+                if (status == null){
+                    var notification = new NotificationMessage("status is still good");
                     connections.broadcast(ctx.session, notification, gameID);
                 }
             } else {
                 status = chessGame.checkStatus(ChessGame.TeamColor.WHITE);
-                if (status != null){
-                    var notification = new NotificationMessage(status);
+                if (status == null){
+                    var notification = new NotificationMessage("status is still good");
                     connections.broadcast(ctx.session, notification, gameID);
                 }
             }

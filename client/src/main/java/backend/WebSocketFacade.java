@@ -116,7 +116,6 @@ public class WebSocketFacade extends Endpoint {
     }
 
     private String[][] transform(ChessBoard chessBoard){
-        //map pieces to board then make a set for the render function
         String[][] board = new String[8][8];
         for(int i= 0; i <8; i++){
             String[] row = new String[8];
