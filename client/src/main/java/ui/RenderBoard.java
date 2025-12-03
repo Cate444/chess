@@ -40,9 +40,9 @@ public class RenderBoard {
         render(teamColor, BLACK_CHESS_START, positions);
     }
 
-    public void render(String teamColor, String[][] CHESS_START){
+    public void render(String teamColor, String[][] chessStart){
         List<ChessPosition> positions = List.of();
-        render(teamColor,CHESS_START, positions);
+        render(teamColor,chessStart, positions);
     }
 
     public void render(String teamColor, String[][] chessStart, List<ChessPosition> positions) {
@@ -76,7 +76,7 @@ public class RenderBoard {
 
 
     // Draws 8x8 board with row numbers and color reset after each line
-    private static void drawChessBoard(PrintStream out, String color, String[][] CHESS_START, List<ChessPosition> positions) {
+    private static void drawChessBoard(PrintStream out, String color, String[][] chessStart, List<ChessPosition> positions) {
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
 
             // Left-side number (8 down to 1)
@@ -102,13 +102,13 @@ public class RenderBoard {
                     if (positions.contains(new ChessPosition(8-boardRow, boardCol+1))){
                         setGreen(out);
                     }
-                    out.print(" " + CHESS_START[7-boardRow][boardCol] + " ");
+                    out.print(" " + chessStart[7-boardRow][boardCol] + " ");
                     //this might be indexing backwards
                 } else{
                     if (positions.contains(new ChessPosition(boardRow-1, 8-boardCol))){
                         setGreen(out);
                     }
-                    out.print(" " + CHESS_START[boardRow][7-boardCol] + " ");
+                    out.print(" " + chessStart[boardRow][7-boardCol] + " ");
                 }
             }
 
