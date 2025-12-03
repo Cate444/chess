@@ -24,7 +24,7 @@ public class Client implements ServerMessageObserver {
     private final Map<Character, Integer> letters = Map.of(
             'a', 1,'b', 2,'c', 3,'d', 4,'e', 5,'f', 6,'g', 7,'h', 8);
     private final Map<Character, Integer> numbers = Map.of(
-            '1', 1,'2', 2,'3', 3,'4', 4,'5', 5,'6', 6,'7', 7,'8', 8);
+            '1', 1,'2', 2,'3', 3,'4', 4,'5', 5,'6', 7,'8', 8);
 
     public Client(String serverUrl) throws Exception {
         loggedIn = false;
@@ -36,28 +36,40 @@ public class Client implements ServerMessageObserver {
     }
 
     public void notifyError(ErrorMessage message){
-        if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             System.out.println(message.getMessage());
-        } else System.out.println(message);
+        } else {
+            System.out.println(message);
+        }
     }
 
     public void notifyNotification(NotificationMessage message){
-        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
             System.out.println(message.message);
-        } else System.out.println(message);
+        } else {
+            System.out.println(message);
+        }
     }
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             if (inGame) {
-                if (!handleInGame(scanner)) break;
+                if (!handleInGame(scanner)) {
+                    break;
+                }
             } else if (observing) {
-                if (!handleObserving(scanner)) break;
+                if (!handleObserving(scanner)) {
+                    break;
+                }
             } else if (loggedIn) {
-                if (!handleLoggedIn(scanner)) break;
+                if (!handleLoggedIn(scanner)) {
+                    break;
+                }
             } else {
-                if (!handleLoggedOut(scanner)) break;
+                if (!handleLoggedOut(scanner)) {
+                    break;
+                }
             }
         }
     }
@@ -65,7 +77,9 @@ public class Client implements ServerMessageObserver {
     private boolean handleInGame(Scanner scanner) {
         System.out.print("[PLAYING] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0) {
+            return true;
+        }
         String command = tokens[0];
 
         switch (command) {
@@ -92,7 +106,9 @@ public class Client implements ServerMessageObserver {
     private boolean handleObserving(Scanner scanner) {
         System.out.print("[OBSERVING] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0) {
+            return true;
+        }
         String command = tokens[0];
 
         switch (command) {
@@ -111,7 +127,9 @@ public class Client implements ServerMessageObserver {
     private boolean handleLoggedIn(Scanner scanner) {
         System.out.print("[LOGGED IN] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0) {
+            return true;
+        }
         String command = tokens[0];
 
         switch (command) {
@@ -136,7 +154,9 @@ public class Client implements ServerMessageObserver {
     private boolean handleLoggedOut(Scanner scanner) {
         System.out.print("[LOGGED OUT] >>> ");
         String[] tokens = scanner.nextLine().split("\\s+");
-        if (tokens.length == 0) return true;
+        if (tokens.length == 0) {
+            return true;
+        }
         String command = tokens[0];
 
         switch (command) {
@@ -160,11 +180,13 @@ public class Client implements ServerMessageObserver {
         try {
             authData = server.register(tokens[1], tokens[2], tokens[3]);
             loggedIn = true;
-        } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void login(String[] tokens){
-        if (tokens.length != 3){
+        if (tokens.length != 3) {
             System.out.println("Usage: login <USERNAME> <PASSWORD>");
             return;
         }
@@ -172,9 +194,11 @@ public class Client implements ServerMessageObserver {
             authData = server.login(tokens[1], tokens[2]);
             loggedIn = true;
         } catch (Exception ex) {
-            if (ex.getMessage().contains("unauthorized"))
+            if (ex.getMessage().contains("unauthorized")) {
                 System.out.println("Username doesn't exist");
-            else System.out.println("internal server error");
+            } else {
+                System.out.println("internal server error");
+            }
         }
     }
 
@@ -182,11 +206,13 @@ public class Client implements ServerMessageObserver {
         try {
             server.logout(authData.authToken());
             loggedIn = false;
-        } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void createGame(String[] tokens){
-        if (tokens.length != 3){
+        if (tokens.length != 3) {
             System.out.println("Usage: create game <NAME>");
             return;
         }
@@ -199,7 +225,7 @@ public class Client implements ServerMessageObserver {
     }
 
     private void listGames(String[] tokens){
-        if (tokens.length != 2){
+        if (tokens.length != 2) {
             System.out.println("Usage: list games");
             return;
         }
@@ -211,15 +237,17 @@ public class Client implements ServerMessageObserver {
                 var g = gameList.get(i);
                 System.out.printf(" %d) %s: %s, %s%n", i+1, g.gameName(), g.whiteUsername(), g.blackUsername());
             }
-        } catch (Exception ex){ printAuthOrInternal(ex); }
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     private void playGame(String[] tokens){
-        if (tokens.length != 3){
+        if (tokens.length != 3) {
             System.out.println("Usage: play <ID> [WHITE|BLACK]");
             return;
         }
-        if (!tokens[2].equalsIgnoreCase("WHITE") && !tokens[2].equalsIgnoreCase("BLACK")){
+        if (!tokens[2].equalsIgnoreCase("WHITE") && !tokens[2].equalsIgnoreCase("BLACK")) {
             System.out.println("Invalid color. Use WHITE or BLACK.");
             return;
         }
@@ -232,11 +260,13 @@ public class Client implements ServerMessageObserver {
             ws.joinGame(authData.authToken(), id, color);
             inGame = true;
             gameInvolvedIn = id;
-        } catch (Exception ex){ printAuthOrInternal(ex); }
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     private void observeGame(String[] tokens){
-        if (tokens.length != 2){
+        if (tokens.length != 2) {
             System.out.println("Usage: observe <ID>");
             return;
         }
@@ -246,11 +276,13 @@ public class Client implements ServerMessageObserver {
             ws.observeGame(id, authData.authToken());
             observing = true;
             gameInvolvedIn = id;
-        } catch (Exception ex){ printAuthOrInternal(ex); }
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     private void leave(String[] tokens){
-        if (tokens.length != 1){
+        if (tokens.length != 1) {
             System.out.println("Usage: leave");
             return;
         }
@@ -259,33 +291,40 @@ public class Client implements ServerMessageObserver {
             observing = false;
             inGame = false;
             gameInvolvedIn = 0;
-        } catch (Exception ex){ printAuthOrInternal(ex); }
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     private void redraw(String[] tokens){
-        if (tokens.length != 1){
+        if (tokens.length != 1) {
             System.out.println("Usage: redraw");
             return;
         }
         try {
             ws.redraw(gameInvolvedIn, authData.authToken());
             renderBoard.render(teamColor);
-        } catch (Exception ex){ printAuthOrInternal(ex); }
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     private void move(String[] tokens){
-        if (tokens.length != 1){
+        if (tokens.length != 1) {
             System.out.println("Usage: move");
             return;
         }
         List<String> positions = getPositions();
         ChessMove move = convert(positions.get(0), positions.get(1));
-        try { ws.move(move, gameInvolvedIn, authData.authToken()); }
-        catch (Exception ex){ printAuthOrInternal(ex); }
+        try {
+            ws.move(move, gameInvolvedIn, authData.authToken());
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     private void highlight(String[] tokens){
-        if(tokens.length != 3){
+        if (tokens.length != 3) {
             System.out.println("Usage: highlight moves <POSITION>");
             return;
         }
@@ -299,19 +338,24 @@ public class Client implements ServerMessageObserver {
         try {
             ws.highlight(new ChessPosition(row, col), gameInvolvedIn, authData.authToken());
             System.out.printf("You would highlight %s%n", pos);
-        } catch (Exception ex){ printAuthOrInternal(ex); }
+        } catch (Exception ex){
+            printAuthOrInternal(ex);
+        }
     }
 
     public void resign(String[] tokens){
-        if(tokens.length != 1){
+        if (tokens.length != 1) {
             System.out.println("Usage: resign");
             return;
         }
         System.out.println("Are you sure (y/n)?");
         String res = new Scanner(System.in).nextLine().strip();
         if (res.equals("y")) {
-            try { ws.resign(gameInvolvedIn, authData.authToken()); }
-            catch (Exception ex){ printAuthOrInternal(ex); }
+            try {
+                ws.resign(gameInvolvedIn, authData.authToken());
+            } catch (Exception ex){
+                printAuthOrInternal(ex);
+            }
         }
     }
 
@@ -327,30 +371,56 @@ public class Client implements ServerMessageObserver {
 
     private ArrayList<String> isCleanPositions(String from, String to){
         ArrayList<String> pos = new ArrayList<>();
-        if (from == null || to == null) return pos;
+        if (from == null || to == null) {
+            return pos;
+        }
         from = from.strip();
         to = to.strip();
         String cf = "", ct = "";
 
-        if (from.length() < 2 || to.length() < 2) return pos;
-        if (from.length() > 2) for (char c: from.toCharArray()) if (!Character.isWhitespace(c)) cf += c;
-        else cf = from;
-        if (to.length() > 2) for (char c: to.toCharArray()) if (!Character.isWhitespace(c)) ct += c;
-        else ct = to;
+        if (from.length() < 2 || to.length() < 2) {
+            return pos;
+        }
+        if (from.length() > 2) {
+            for (char c: from.toCharArray()) {
+                if (!Character.isWhitespace(c)) {
+                    cf += c;
+                }
+            }
+        } else {
+            cf = from;
+        }
+        if (to.length() > 2) {
+            for (char c: to.toCharArray()) {
+                if (!Character.isWhitespace(c)) {
+                    ct += c;
+                }
+            }
+        } else {
+            ct = to;
+        }
 
-        if (!Character.isLetter(cf.charAt(0)) || !Character.isDigit(cf.charAt(1))){
-            if (Character.isLetter(cf.charAt(1)) && Character.isDigit(cf.charAt(0)))
+        if (!Character.isLetter(cf.charAt(0)) || !Character.isDigit(cf.charAt(1))) {
+            if (Character.isLetter(cf.charAt(1)) && Character.isDigit(cf.charAt(0))) {
                 cf = "" + cf.charAt(1) + cf.charAt(0);
-            else return pos;
+            } else {
+                return pos;
+            }
         }
-        if (!Character.isLetter(ct.charAt(0)) || !Character.isDigit(ct.charAt(1))){
-            if (Character.isLetter(ct.charAt(1)) && Character.isDigit(ct.charAt(0)))
+        if (!Character.isLetter(ct.charAt(0)) || !Character.isDigit(ct.charAt(1))) {
+            if (Character.isLetter(ct.charAt(1)) && Character.isDigit(ct.charAt(0))) {
                 ct = "" + ct.charAt(1) + ct.charAt(0);
-            else return pos;
+            } else {
+                return pos;
+            }
         }
 
-        if ("abcdefgh".indexOf(ct.charAt(0)) == -1) return pos;
-        if ("12345678".indexOf(ct.charAt(1)) == -1) return pos;
+        if ("abcdefgh".indexOf(ct.charAt(0)) == -1) {
+            return pos;
+        }
+        if ("12345678".indexOf(ct.charAt(1)) == -1) {
+            return pos;
+        }
 
         pos.add(cf);
         pos.add(ct);
@@ -359,7 +429,7 @@ public class Client implements ServerMessageObserver {
 
     private ChessMove convert(String from, String to){
         ArrayList<String> pos = isCleanPositions(from, to);
-        while (pos.size() == 0){
+        while (pos.size() == 0) {
             List<String> raw = getPositions();
             pos = isCleanPositions(raw.get(0), raw.get(1));
         }
@@ -378,7 +448,7 @@ public class Client implements ServerMessageObserver {
         ChessPosition tp = new ChessPosition(tr, tc);
 
         ChessPiece.PieceType promo = null;
-        if ((tr == 8 && "WHITE".equals(teamColor)) || (tr == 1 && "BLACK".equals(teamColor))){
+        if ((tr == 8 && "WHITE".equals(teamColor)) || (tr == 1 && "BLACK".equals(teamColor))) {
             System.out.print("Promote to: ");
             promo = ChessPiece.PieceType.valueOf(new Scanner(System.in).nextLine().strip().toUpperCase());
         }
@@ -386,8 +456,10 @@ public class Client implements ServerMessageObserver {
     }
 
     private void printAuthOrInternal(Exception ex){
-        if (ex.getMessage().contains("unauthorized"))
+        if (ex.getMessage().contains("unauthorized")) {
             System.out.println("you aren't authorized");
-        else System.out.println("internal server error");
+        } else {
+            System.out.println("internal server error");
+        }
     }
 }
