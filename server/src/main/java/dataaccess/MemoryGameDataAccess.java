@@ -98,4 +98,18 @@ public class MemoryGameDataAccess implements GameDataAccess {
         }
         return null;
     }
+
+    @Override
+    public void changePlayers(ChessGame.TeamColor color, int gameID)throws Exception{
+        for (GameData game: gameList){
+            if (game.gameID() == gameID){
+                gameList.remove(game);
+                if (color == ChessGame.TeamColor.WHITE){
+                    gameList.add(new GameData(gameID, null, game.blackUsername(), game.gameName() ,game.chessGame()));
+                } else if (color == ChessGame.TeamColor.BLACK){
+                    gameList.add(new GameData(gameID, game.whiteUsername(), null, game.gameName() ,game.chessGame()));
+                }
+            }
+        }
+    }
 }

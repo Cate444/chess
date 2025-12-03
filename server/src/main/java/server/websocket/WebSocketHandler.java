@@ -61,8 +61,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(WsMessageContext ctx) throws Exception{
         Session session = ctx.session;
-        JoinGameCommand joinGameCommand = new Gson().fromJson(ctx.message(), JoinGameCommand.class);
         UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        int gameID = userGameCommand.getGameID();
         connections.add(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
         try {
             String username = userDataAccess.getUser(userGameCommand.getAuthToken());
@@ -70,7 +70,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String notificationString = String.format("%s is playing game %s", username, gameName);
             var notification = new NotificationMessage(notificationString);
             connections.broadcast(session, notification, userGameCommand.getGameID());
-            int gameID = userGameCommand.getGameID();
             ChessGame chessGame = getGame(gameID);
             if (chessGame == null) {
                 throw new Exception("game not found");
@@ -181,6 +180,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.remove(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
             String username = userDataAccess.getUser(userGameCommand.getAuthToken());
             String gameName = gameDataAccess.getGameName(userGameCommand.getGameID().intValue());
+            GameData gameData = gameDataAccess.getGameInfo(userGameCommand.getGameID());
+            if (gameData.whiteUsername() != null) {
+                if(gameData.whiteUsername().equals(username)){
+                    gameDataAccess.changePlayers(ChessGame.TeamColor.WHITE ,userGameCommand.getGameID());
+                }
+            } else if (gameData.blackUsername() != null){
+                if (gameData.blackUsername().equals(username)){
+                    gameDataAccess.changePlayers(ChessGame.TeamColor.BLACK ,userGameCommand.getGameID());
+                }
+            }
             String notificationString = String.format("%s left game %s", username, gameName);
             var notification = new NotificationMessage(notificationString);
             connections.broadcast(session, notification, userGameCommand.getGameID());

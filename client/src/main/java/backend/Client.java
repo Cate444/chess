@@ -247,7 +247,7 @@ public class Client implements ServerMessageObserver{
             String gameName = tokens[2];
             try{
                 Map<String, Integer> gameId = server.createGame(authData.authToken(), gameName);
-                System.out.printf("%s id is %s %n", gameName, gameId.get("gameID"));
+                System.out.printf("%s has been made%n", gameName);
             } catch (Exception ex) {
                 if (ex.getMessage().equals("body exception: {\"message\":\"Error: unauthorized\"}")) {
                     System.out.println("you aren't authorized");

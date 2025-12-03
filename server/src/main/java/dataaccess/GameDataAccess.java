@@ -17,4 +17,5 @@ public interface GameDataAccess {
     String getGameName(int gameID) throws Exception;
     void updateGameData(int gameID, ChessGame chessGame) throws Exception;
     GameData getGameInfo(int gameID) throws Exception;
+    void changePlayers(ChessGame.TeamColor color, int gameID)throws Exception;
 }

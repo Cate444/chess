@@ -219,6 +219,26 @@ public class SQLGameDataAccess implements GameDataAccess {
         }
     }
 
+    public void changePlayers(ChessGame.TeamColor color, int gameID)throws Exception{
+        try(Connection conn = DatabaseManager.getConnection()) {
+            if (color == ChessGame.TeamColor.WHITE){
+                String updateGame = "UPDATE gameTable SET whiteUsername = null WHERE gameID = ?";
+                try (var preparedStatement = conn.prepareStatement(updateGame)) {
+                    preparedStatement.setInt(1, gameID);
+                    preparedStatement.executeUpdate();
+                }
+            } else if (color == ChessGame.TeamColor.BLACK){
+                String updateGame = "UPDATE gameTable SET blackUsername = null WHERE gameID = ?";
+                try (var preparedStatement = conn.prepareStatement(updateGame)) {
+                    preparedStatement.setInt(1, gameID);
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
     public String getGameName(int gameID) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()){
             String selectGameName = "SELECT gameName FROM gameTable WHERE gameID = ?";
