@@ -353,6 +353,8 @@ public class Client implements ServerMessageObserver {
         if (res.equals("y")) {
             try {
                 ws.resign(gameInvolvedIn, authData.authToken());
+                inGame = false;
+                gameInvolvedIn = 0;
             } catch (Exception ex){
                 printAuthOrInternal(ex);
             }
