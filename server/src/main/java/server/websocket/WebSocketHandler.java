@@ -3,6 +3,7 @@ package server.websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.GameDataAccess;
 import dataaccess.SQLGameDataAccess;
@@ -76,7 +77,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             String username = userDataAccess.getUser(userGameCommand.getAuthToken());
             String gameName = gameDataAccess.getGameName(userGameCommand.getGameID());
-            String notificationString = String.format("%s is playing game %s", username, gameName);
+            GameData gameData = gameDataAccess.getGameInfo(gameID);
+            String notificationString;
+            if (gameData.blackUsername() == username){
+                notificationString = String.format("%s is playing game %s as %s", username, gameName, ChessGame.TeamColor.BLACK);
+            } else {
+                notificationString = String.format("%s is playing game %s as %s", username, gameName, ChessGame.TeamColor.WHITE);
+            }
             var notification = new NotificationMessage(notificationString);
             connections.broadcast(session, notification, userGameCommand.getGameID());
             ChessGame chessGame = getGame(gameID);
@@ -129,13 +136,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             }
             String color = chessGame.getTeamTurn().toString();
             GameData gameData = gameDataAccess.getGameInfo(gameID);
-            String dataBaseUsername = userDataAccess.getUser(authToken);
-            if(ChessGame.TeamColor.WHITE == chessGame.getTeamTurn()){
-                if (!gameData.whiteUsername().equals(dataBaseUsername)){
+            String currentUsername = userDataAccess.getUser(authToken);
+            if(ChessGame.TeamColor.WHITE.equals(chessGame.getTeamTurn())){
+                if (gameData.whiteUsername() == null ||!gameData.whiteUsername().equals(currentUsername)){
                     throw new Exception("not your turn");
                 }
-            } else if (!ChessGame.TeamColor.BLACK.equals(chessGame.getTeamTurn())){
-                if (gameData.blackUsername() != dataBaseUsername){
+            } else if (ChessGame.TeamColor.BLACK.equals(chessGame.getTeamTurn())){
+                if (gameData.blackUsername() == null || !gameData.blackUsername().equals(currentUsername)){
                     throw new Exception("not your turn");
                 }
             }
@@ -158,19 +165,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if (color == "WHITE"){
                 status = chessGame.checkStatus(ChessGame.TeamColor.BLACK);
                 if (status == null){
-                    var notification = new NotificationMessage(dataBaseUsername + " moved from " + startPosition +
+                    var notification = new NotificationMessage(currentUsername + " moved from " + startPosition +
                             " to " + endPosition);
                     connections.broadcast(ctx.session, notification, gameID);
                 }
             } else {
                 status = chessGame.checkStatus(ChessGame.TeamColor.WHITE);
                 if (status == null){
-                    var notification = new NotificationMessage(dataBaseUsername + " moved from " + startPosition +
+                    var notification = new NotificationMessage(currentUsername + " moved from " + startPosition +
                             " to " + endPosition);
                     connections.broadcast(ctx.session, notification, gameID);
                 }
             }
 
+        } catch(InvalidMoveException ex){
+            System.out.println(ex.getMessage());
+            var error = new ErrorMessage(ex.getMessage());
+            connections.broadcastError(ctx.session, error);
         } catch (Exception ex){
             var error = new ErrorMessage(ex.getMessage());
             connections.broadcastError(ctx.session, error);

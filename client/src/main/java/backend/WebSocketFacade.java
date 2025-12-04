@@ -25,6 +25,7 @@ public class WebSocketFacade extends Endpoint {
     Session session;
     ServerMessageObserver serverMessageObserver;
     ChessGame.TeamColor teamColor;
+    ChessBoard currentChessBoard;
 
     public WebSocketFacade(String url, ServerMessageObserver serverMessageObserver) throws Exception {
         try {
@@ -68,10 +69,14 @@ public class WebSocketFacade extends Endpoint {
         List<ChessPosition> positions = new ArrayList<>();
         for (ChessMove move : moves) {
             positions.add(move.getEndPosition());
-            System.out.println(move.getEndPosition().toString());
+            //System.out.println(move.getEndPosition().toString());
         }
         RenderBoard renderBoard = new RenderBoard();
-        renderBoard.render(teamColor.toString(),board, positions);
+        if (teamColor == null){
+            renderBoard.render(ChessGame.TeamColor.WHITE.toString(), board, positions);
+        }else {
+            renderBoard.render(teamColor.toString(),board, positions);
+        }
     }
 
     private void notificationMessage(String message){
@@ -87,6 +92,7 @@ public class WebSocketFacade extends Endpoint {
     private void loadGameMessage(String message){
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         ChessBoard chessBoard = loadGameMessage.gameBoard();
+        currentChessBoard = chessBoard;
         String[][] board = transform(chessBoard);
         RenderBoard boardRender = new RenderBoard();
         if (teamColor == null){
@@ -172,6 +178,8 @@ public class WebSocketFacade extends Endpoint {
         try {
             var userGameCommand = new MakeMoveGameCommand(authToken, gameID, chessMove);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+            //trying to move the 3 time the websocket is closed
+
         } catch (Exception ex) {
             throw ex;
         }
@@ -179,11 +187,20 @@ public class WebSocketFacade extends Endpoint {
 
     public void redraw(int gameID, String authToken) throws Exception{
         try{
-            UserGameCommand redrawCommand = new UserGameCommand(UserGameCommand.CommandType.REDRAW, authToken, gameID);
-            this.session.getBasicRemote().sendText((new Gson().toJson(redrawCommand)));
+            String[][] board = transform(currentChessBoard);
+            RenderBoard boardRender = new RenderBoard();
+            if (teamColor == null){
+                boardRender.render("WHITE", board);
+            }else {
+                boardRender.render(teamColor.toString(), board);
+            }
         } catch (Exception ex){
             throw ex;
         }
+    }
+
+    public ChessBoard getCurrentChessBoard(){
+        return currentChessBoard;
     }
 
     public void resign(int gameID, String authToken) throws Exception{

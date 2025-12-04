@@ -105,7 +105,7 @@ public class RenderBoard {
                     out.print(" " + chessStart[7-boardRow][boardCol] + " ");
                     //this might be indexing backwards
                 } else{
-                    if (positions.contains(new ChessPosition(boardRow-1, 8-boardCol))){
+                    if (positions.contains(new ChessPosition(boardRow+1, boardCol))){
                         setGreen(out);
                     }
                     out.print(" " + chessStart[boardRow][7-boardCol] + " ");

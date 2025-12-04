@@ -24,7 +24,7 @@ public class Client implements ServerMessageObserver {
     private final Map<Character, Integer> letters = Map.of(
             'a', 1,'b', 2,'c', 3,'d', 4,'e', 5,'f', 6,'g', 7,'h', 8);
     private final Map<Character, Integer> numbers = Map.of(
-            '1', 1,'2', 2,'3', 3,'4', 4,'5', 5,'6', 7,'8', 8);
+            '1', 1,'2', 2,'3', 3,'4', 4,'5', 5,'6',6,'7', 7, '8', 8);
 
     public Client(String serverUrl) throws Exception {
         loggedIn = false;
@@ -115,7 +115,9 @@ public class Client implements ServerMessageObserver {
             case "menu" -> observing = false;
             case "quit" -> { return false; }
             case "leave" -> leave(tokens);
+            case "highlight" -> highlight(tokens);
             default -> System.out.println("""
+                highlight moves <POSITION> 
                 leave - leave the game
                 menu - return to login state
                 quit - exit
@@ -303,8 +305,9 @@ public class Client implements ServerMessageObserver {
         }
         try {
             ws.redraw(gameInvolvedIn, authData.authToken());
-            renderBoard.render(teamColor);
+            //renderBoard.render(teamColor, );
         } catch (Exception ex){
+            System.out.println(ex.getMessage());
             printAuthOrInternal(ex);
         }
     }
@@ -315,8 +318,8 @@ public class Client implements ServerMessageObserver {
             return;
         }
         List<String> positions = getPositions();
-        ChessMove move = convert(positions.get(0), positions.get(1));
         try {
+            ChessMove move = convert(positions.get(0), positions.get(1));
             ws.move(move, gameInvolvedIn, authData.authToken());
         } catch (Exception ex){
             printAuthOrInternal(ex);
@@ -337,7 +340,7 @@ public class Client implements ServerMessageObserver {
         Integer row = numbers.get(pos.charAt(1));
         try {
             ws.highlight(new ChessPosition(row, col), gameInvolvedIn, authData.authToken());
-            System.out.printf("You would highlight %s%n", pos);
+            //System.out.printf("You would highlight %s%n", pos);
         } catch (Exception ex){
             printAuthOrInternal(ex);
         }
@@ -429,7 +432,7 @@ public class Client implements ServerMessageObserver {
         return pos;
     }
 
-    private ChessMove convert(String from, String to){
+    private ChessMove convert(String from, String to) throws Exception{
         ArrayList<String> pos = isCleanPositions(from, to);
         while (pos.size() == 0) {
             List<String> raw = getPositions();
@@ -450,7 +453,9 @@ public class Client implements ServerMessageObserver {
         ChessPosition tp = new ChessPosition(tr, tc);
 
         ChessPiece.PieceType promo = null;
-        if ((tr == 8 && "WHITE".equals(teamColor)) || (tr == 1 && "BLACK".equals(teamColor))) {
+        ChessBoard board =  ws.getCurrentChessBoard();
+        ChessPiece piece = board.getPiece(new ChessPosition(fr,fc));
+        if ((tr == 8 && "WHITE".equals(teamColor)) && piece.getPieceType().equals(ChessPiece.PieceType.PAWN)  || (tr == 1 && "BLACK".equals(teamColor) && piece.getPieceType().equals(ChessPiece.PieceType.PAWN))) {
             System.out.print("Promote to: ");
             promo = ChessPiece.PieceType.valueOf(new Scanner(System.in).nextLine().strip().toUpperCase());
         }
