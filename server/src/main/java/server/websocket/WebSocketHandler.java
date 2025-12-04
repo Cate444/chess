@@ -155,8 +155,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.broadcast(null, update ,gameID);
             String status = chessGame.checkStatus(chessGame.getTeamTurn());
             if (status != null){
-                var notification = new NotificationMessage(status);
-                connections.broadcast(ctx.session, notification, gameID);
+                String statusUpdate;
+                if(status.indexOf(0) == 'W'){
+                    statusUpdate = gameData.whiteUsername() + " as "+ status;
+                } else {
+                    statusUpdate = gameData.blackUsername() + " as " + status;
+                }
+                var notification = new NotificationMessage(statusUpdate);
+                connections.broadcast(null, notification, gameID);
             }
 
             String startPosition = convertPosition(chessMove.getStartPosition());
