@@ -467,6 +467,10 @@ public class Client implements ServerMessageObserver {
     private void printAuthOrInternal(Exception ex){
         if (ex.getMessage().contains("unauthorized")) {
             System.out.println("you aren't authorized");
+        } else if (ex.getMessage().equals("no piece there")){
+            System.out.println("no piece there");
+        } else if (ex.getMessage().contains("team already has player")) {
+            System.out.println("team already has a player");
         } else {
             System.out.println("internal server error");
         }

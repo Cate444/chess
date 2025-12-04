@@ -114,6 +114,9 @@ public class WebSocketFacade extends Endpoint {
 
     public void highlight(ChessPosition position, int gameID, String authToken) throws IOException{
         try {
+            if(currentChessBoard.getPiece(position) == null){
+                throw new IOException("no piece there");
+            }
             var highlightCommand = new HighlightGameCommand(authToken, gameID, position);
             this.session.getBasicRemote().sendText(new Gson().toJson(highlightCommand));
         } catch (Exception ex) {
