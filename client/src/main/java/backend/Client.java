@@ -116,8 +116,10 @@ public class Client implements ServerMessageObserver {
             case "quit" -> { return false; }
             case "leave" -> leave(tokens);
             case "highlight" -> highlight(tokens);
+            case "redraw" -> redraw(tokens);
             default -> System.out.println("""
                 highlight moves <POSITION> 
+                redraw - redraws board
                 leave - leave the game
                 menu - return to login state
                 quit - exit
